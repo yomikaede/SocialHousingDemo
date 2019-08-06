@@ -11,7 +11,7 @@
 		scene3DOnly : true,
 		imageryProvider: new Cesium.UrlTemplateImageryProvider({
 			//谷歌地图影像图层
-			url:"http://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}&s=Gali"
+			url:"https://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}&s=Gali"
 		}),
 		animation: false
 	});
@@ -61,7 +61,7 @@
 		canvas : viewer.scene.canvas,
 		clampToGround : true
 	};	
-	var boundaryPromise = Cesium.KmlDataSource.load('/Source/KMLFiles/baliu_bl.kml', kmlOptions);
+	var boundaryPromise = Cesium.KmlDataSource.load('/SocialHousingDemo/Source/KMLFiles/baliu_bl.kml', kmlOptions);
 	boundaryPromise.then(function(dataSource) {
         viewer.dataSources.add(dataSource);
         var boundaryEntities = dataSource.entities.values;
@@ -94,7 +94,7 @@
     })
 
 	//读取小区周边kml文件
-	var neighborPromise = Cesium.KmlDataSource.load('/Source/KMLFiles/baliu_nbhd.kml', kmlOptions);
+	var neighborPromise = Cesium.KmlDataSource.load('/SocialHousingDemo/Source/KMLFiles/baliu_nbhd.kml', kmlOptions);
     neighborPromise.then(function(dataSource) {
         viewer.dataSources.add(dataSource);
         var neighborEntities = dataSource.entities.values;
@@ -126,7 +126,7 @@
     })
 	
 	//读取建筑kml文件
-	var buildingPromise = Cesium.KmlDataSource.load('/Source/KMLFiles/baliu_bldg.kml', kmlOptions);
+	var buildingPromise = Cesium.KmlDataSource.load('/SocialHousingDemo/Source/KMLFiles/baliu_bldg.kml', kmlOptions);
     buildingPromise.then(function(dataSource) {
     	viewer.dataSources.add(dataSource);
         var buildingEntities = dataSource.entities.values;
