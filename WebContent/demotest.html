@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- Use correct character set. -->
+	<meta charset="utf-8">
+	<title>demo</title>
+	<!-- Cesium引用 -->
+	<script src="https://cesiumjs.org/releases/1.59/Build/Cesium/Cesium.js"></script>
+	<style>
+		@import url(https://cesiumjs.org/releases/1.59/Build/Cesium/Widgets/widgets.css);
+		html, body, #cesiumContainer {
+			width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; z-index: 1;
+		}
+	</style>
+  
+    <!-- 弹出窗口样式 -->
+    <style>
+ 
+		/*弹出层*/
+        #popBox {
+            display: block;
+            z-index: 11;
+			width: 400px;
+            height: 300px;
+            position: fixed;
+			top: 10px;
+			right: 10px;
+            margin: 0;
+			background-color: #fff;
+		}
+		
+		#picPopLayer {
+			display: none;
+			position: fixed;
+			z-index: 10;
+			bottom: 20px;
+			right: 10px;
+			width: 440px;
+            height: 340px;
+			background: rgba(38, 38, 38, 0.95);
+			color: #edffff;
+			border: 1px solid #444;
+			border-right: none;
+			border-top-left-radius: 7px;
+			border-bottom-left-radius: 7px;
+			box-shadow: 0 0 10px 1px #000;
+		}
+		
+		#picPopLayer .close {
+			display: block;
+			position: absolute;
+			top: 5px;
+			right: 5px;
+			height: 20px;
+			background: transparent;
+			border: none;
+			border-radius: 2px;
+			font-weight: bold;
+			font-size: 16px;
+			padding: 0 5px;
+			margin: 0;
+			color: #edffff;
+			text-decoration: none;
+			text-align: right;
+		}
+		
+		#chartPopLayer {
+			display: block;
+			position: fixed;
+			z-index: 10;
+			bottom: 20px;
+			left: 10px;
+			width: 440px;
+            height: 340px;
+			background: rgba(38, 38, 38, 0.95);
+			color: #edffff;
+			border: 1px solid #444;
+			border-right: none;
+			border-top-left-radius: 7px;
+			border-bottom-left-radius: 7px;
+			box-shadow: 0 0 10px 1px #000;
+		}
+ 
+    </style>
+  
+  
+</head>
+<body>
+	<div id="cesiumContainer"></div>
+	<!-- <div id="echartsContainer" style="height: 100%"></div> -->
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+    <!-- <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=xfhhaTThl11qYVrqLZii6w8qE5ggnhrY&__ec_v__=20190126"></script> -->
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+    <script>
+  	//Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyMTRjOTU4NC05YjgzLTRkY2ItODc5Ny1iMmNjYTY1NGM4NTYiLCJpZCI6MTMzNTksInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjMxNjA2NDd9.8QNebQOHWVNfaHACDU8dgldjiaDQnrin6OkSht96Tx8';
+	
+	var base = new Cesium.UrlTemplateImageryProvider({
+		url : 'https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}'
+	});
+	
+  	var viewer = new Cesium.Viewer('cesiumContainer',{
+		baseLayerPicker : false,
+		timeline : false,
+		scene3DOnly : true,
+		//imageryProvider: base,
+		imageryProvider:new Cesium.UrlTemplateImageryProvider({
+			url:"http://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}&s=Gali"
+		}),
+		animation: false
+    });
+	
+	
+	
+	var road = new Cesium.UrlTemplateImageryProvider({
+		url : 'https://wprd02.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=2&style=8&ltype=11'
+	});
+
+
+	//viewer.imageryLayers.addImageryProvider(road);
+    /*viewer.terrainProvider = Cesium.createWorldTerrain({
+      requestWaterMask : true, // required for water effects
+      requestVertexNormals : true // required for terrain lighting
+    });*/
+    // Enable depth testing so things behind the terrain disappear.
+    viewer.scene.globe.depthTestAgainstTerrain = true;
+    //var initialPosition = new Cesium.Cartesian3.fromDegrees(108.940729014, 34.1043936431, 2631.082799425431);
+    var initialPosition = new Cesium.Cartesian3.fromDegrees(108.951900,34.227466, 500.082799425431);
+    var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(7.1077496389876024807, -31.987223091598949054, 0.025883251314954971306);
+    var homeCameraView = {
+        destination : initialPosition,
+        orientation : {
+            heading : initialOrientation.heading,
+            pitch : initialOrientation.pitch,
+            roll : initialOrientation.roll
+        }
+    };
+    // Set the initial view
+    viewer.scene.camera.setView(homeCameraView);
+
+    viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
+        e.cancel = true;
+        viewer.scene.camera.flyTo(homeCameraView);
+    });
+
+
+    var city = viewer.scene.primitives.add(
+      new Cesium.Cesium3DTileset({
+          url:'/CesiumStudy/WebContent/data/3dtiles/tileset.json'
+      })
+    );
+
+    var heightStyle = new Cesium.Cesium3DTileStyle({
+        color : {
+            conditions : [
+                ["${floor} >= 20", "rgba(45, 0, 75, 0.5)"],
+                ["${floor} >= 15", "rgb(102, 71, 151)"],
+                ["${floor} >= 10", "rgb(170, 162, 204)"],
+                ["${floor} >= 5", "rgb(224, 226, 238)"],
+                ["true", "rgb(127, 59, 8)"]
+            ]
+        }
+    });	
+	city.style = heightStyle;
+
+    var geoEntities = new Cesium.EntityCollection();
+    var geocacheEntities;
+
+    var kmlOptions = {
+        camera : viewer.scene.camera,
+        canvas : viewer.scene.canvas,
+        clampToGround : true
+    };
+	
+    // Load geocache points of interest from a KML file
+    var geocachePromise = Cesium.KmlDataSource.load('/demo.kml', kmlOptions);
+    var dictionary = [];
+	var x_ChartData = [];
+	var y_ChartData = [];
+    geocachePromise.then(function(dataSource) {
+        // Add the new data as entities to the viewer
+        viewer.dataSources.add(dataSource);
+
+        // Get the array of entities
+        geoEntities = dataSource.entities;
+        geocacheEntities=dataSource.entities.values;
+        for (var i=0; i<geocacheEntities.length; i++) 
+        {
+			entity=geocacheEntities[i];
+			if (Cesium.defined(entity.kml.extendedData)) {
+				//console.log(entity.kml.extendedData.id.value);
+				dictionary[entity.kml.extendedData.id.value] = entity.id;
+				//console.log(entity.kml.extendedData.height.value);
+				x_ChartData.push(entity.kml.extendedData.buildingID.value);
+				y_ChartData.push(entity.kml.extendedData.floor.value);
+			}
+
+        }
+		console.log(dictionary);
+		createChart(x_ChartData, y_ChartData, '楼号', '层数');
+		//createChart(chartData);
+    })
+
+
+    var selectedEntity = new Cesium.Entity();
+    var originColor = Cesium.Color.BLUE;
+    var originFeature = new Cesium.Entity();
+	
+    viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
+         // Pick a new feature
+          originFeature.color = originColor;
+          var pickedFeature = viewer.scene.pick(movement.position);
+          if(Cesium.defined(pickedFeature))
+          {
+            originColor = pickedFeature.color;
+            pickedFeature.color = Cesium.Color.BLUE;
+            originFeature = pickedFeature;
+            //selectedEntity=geocacheEntities.GetById(pickedFeature.getProperty('id'));
+            selectedEntity.name='建筑详情';
+            viewer.selectedEntity = selectedEntity;
+            var buildingID = dictionary[pickedFeature.getProperty('id')];
+            console.log(buildingID);
+            var buildingInfo = geoEntities.getById(buildingID).kml.extendedData;
+            //console.log(geoEntities);
+            selectedEntity.description = '<table class="cesium-infoBox-defaultTable"><tbody>' +
+                                          '<tr><th>楼号</th><td>' + buildingInfo.buildingID.value + '</td></tr>' +
+                                          '<tr><th>层高</th><td>' + buildingInfo.floor.value + '</td></tr>' +
+                                          '<tr><th>住户数量</th><td>' + buildingInfo.household.value + '</td></tr>' +
+                                          '</tbody></table>';
+			document.getElementById('picContainer').innerHTML = '<img src="/source/' + buildingInfo.image.value + '"alt="">'
+			popBox();
+          }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+	
+	
+	
+	
+    </script>
+  
+	<script>
+		/*点击弹出按钮*/
+		function popBox() {
+			var popLayer = document.getElementById("picPopLayer");
+			popLayer.style.display = "block";
+		};
+	 
+		/*点击关闭按钮*/
+		function closeBox() {
+			console.log('1');
+			var popLayer = document.getElementById("picPopLayer");
+			popLayer.style.display = "none";
+			console.log('1');
+		}
+	</script>
+  
+    <!-- 弹出图片 -->
+	<div id="picPopLayer" class="picPopLayer">
+		<div id="picContainer" class="popBox"></div>
+		<a class="close" οnclick="closeBox()">x</a>
+	</div>
+	
+	<!-- 图表 -->
+	<div id="chartPopLayer" class="chartPopLayer">
+		<div id="echartsContainer" style="height: 100%" class="popBox"> </div>
+	</div>
+	
+	<script type="text/javascript">
+	
+	function createChart(x_data, y_data, x_name, y_name)
+	{
+		console.log('1');
+		var dom = document.getElementById("echartsContainer");
+		var myChart = echarts.init(dom);
+		var app = {};
+		option = null;
+		option = {
+			xAxis: {
+				type: 'category',
+				data: x_data,
+				name: x_name
+			},
+			yAxis: {
+				type: 'value',
+				name: y_name
+			},
+			series: [{
+				//data: [820, 932, 901, 934, 1290, 1330, 1320],
+				data: y_data,
+				type: 'line'
+			}],
+			textStyle: {
+				color: 'rgba(255, 255, 255, 0.3)'
+			}
+		};
+		;
+		console.log('1');
+		if (option && typeof option === "object") {
+			myChart.setOption(option, true);
+		}
+	}
+    </script>
+		  
+    
+  
+	</body>
+</html>

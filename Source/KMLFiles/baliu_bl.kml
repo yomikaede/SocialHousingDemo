@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<kml xmlns:kml="http://earth.google.com/kml/2.2">
+  <Document id="Neighbourhood">
+<Style id="defaultStyle">
+  <LineStyle>
+    <width>1.5</width>
+  </LineStyle>
+  <PolyStyle>
+    <color>7d8a30c4</color>
+  </PolyStyle>
+</Style>
+  <Folder><Placemark>
+      <styleUrl>#defaultStyle</styleUrl>
+      <name>上庄灞柳小区</name>
+          <LineString>
+            <coordinates>
+              109.001534,34.384256,0.000000
+              109.0011,34.3814,0.000000
+              109.003975,34.381370,0.000000
+              109.004023,34.384322,0.000000
+              109.001642,34.384331,0.000000
+              109.001534,34.384256,0.000000
+            </coordinates>
+          </LineString>
+    </Placemark></Folder>  </Document>
+  </kml>

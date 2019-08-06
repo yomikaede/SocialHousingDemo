@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<kml xmlns:kml="http://earth.google.com/kml/2.2">
+  <Document id="featureCollection">
+<Style id="defaultStyle">
+  <LineStyle>
+    <width>1.5</width>
+  </LineStyle>
+  <PolyStyle>
+    <color>7d8a30c4</color>
+  </PolyStyle>
+</Style>
+  <Folder><Placemark>
+      <styleUrl>#defaultStyle</styleUrl>
+      <ExtendedData>
+        <Data name="floor"><value>10</value></Data><Data name="household"><value>20</value></Data><Data name="image"><value>baliu_001.jpg</value></Data><Data name="id"><value>76405</value></Data><Data name="buildingID"><value>1号楼</value></Data>
+      </ExtendedData>
+      <Point><coordinates>
+      -73.88895811640342,40.8962098695574
+    </coordinates></Point>
+    <id>90</id>
+    <color>red</color>
+    </Placemark>
+	<Placemark>
+      <styleUrl>#defaultStyle</styleUrl>
+      <ExtendedData>
+        <Data name="floor"><value>12</value></Data><Data name="household"><value>18</value></Data><Data name="image"><value>baliu_002.jpg</value></Data><Data name="id"><value>76395</value></Data><Data name="buildingID"><value>2号楼</value></Data>
+      </ExtendedData>
+      <Point><coordinates>
+      -73.88895811640342,40.8962098695574
+    </coordinates></Point>
+    <id>91</id>
+    <color>red</color>
+    </Placemark>
+	<Placemark>
+      <styleUrl>#defaultStyle</styleUrl>
+      <ExtendedData>
+        <Data name="floor"><value>8</value></Data><Data name="household"><value>22</value></Data><Data name="image"><value>baliu_003.jpg</value></Data><Data name="id"><value>76398</value></Data><Data name="buildingID"><value>3号楼</value></Data>
+      </ExtendedData>
+      <Point><coordinates>
+      -73.88895811640342,40.8962098695574
+    </coordinates></Point>
+    <id>92</id>
+    <color>red</color>
+    </Placemark>
+	</Folder>  </Document>
+  </kml>

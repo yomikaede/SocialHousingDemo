@@ -1,0 +1,74 @@
+#picPopLayer {
+	display: none;
+	position: fixed;
+	z-index: 10;
+	bottom: 20px;
+	right: 10px;
+	width: 440px;
+	height: 340px;
+	background: rgba(38, 38, 38, 0.95);
+	color: #edffff;
+	border: 1px solid #444;
+	border-right: none;
+	border-top-left-radius: 7px;
+	border-bottom-left-radius: 7px;
+	box-shadow: 0 0 10px 1px #000;
+}
+
+#picPopLayer .popBox {
+	display: block;
+	z-index: 10;
+	width: 400px;
+	height: 300px;
+	position: absolute;
+	bottom: 20px;
+	left: 20px;
+	margin: 0;
+	background: transparent;
+}
+
+#picPopLayer .close {
+	display: block;
+	position: absolute;
+	z-index: 11;
+	top: 5px;
+	right: 5px;
+	height: 20px;
+	background: transparent;
+	border: none;
+	font-weight: bold;
+	font-size: 16px;
+	padding: 0 5px;
+	margin: 0;
+	color: #edffff;
+	text-decoration: none;
+	text-align: right;
+}
+
+#chartPopLayer {
+	display: none;
+	position: fixed;
+	z-index: 10;
+	bottom: 20px;
+	left: 10px;
+	width: 440px;
+	height: 340px;
+	background: rgba(38, 38, 38, 0.95);
+	color: #edffff;
+	border: 1px solid #444;
+	border-right: none;
+	border-top-left-radius: 7px;
+	border-bottom-left-radius: 7px;
+	box-shadow: 0 0 10px 1px #000;
+}
+
+#chartPopLayer .popBox {
+	display: block;
+	z-index: 10;
+	width: 420px;
+	height: 320px;
+	bottom: 0px;
+	left: 10px;
+	position: absolute;	
+	background: transparent;
+}
