@@ -11,7 +11,7 @@
 		scene3DOnly : true,
 		imageryProvider: new Cesium.UrlTemplateImageryProvider({
 			//谷歌地图影像图层
-			url:"https://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}&s=Gali"
+			url:"http://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}&s=Gali"
 		}),
 		animation: false
 	});
