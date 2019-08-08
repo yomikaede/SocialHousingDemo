@@ -65,10 +65,27 @@
 #chartPopLayer .popBox {
 	display: block;
 	z-index: 10;
-	width: 420px;
-	height: 320px;
+	width: 440px;
+	height: 340px;
 	bottom: 0px;
-	left: 10px;
 	position: absolute;	
 	background: transparent;
+}
+
+#chartPopLayer .close {
+	display: block;
+	position: absolute;
+	z-index: 11;
+	top: 5px;
+	right: 5px;
+	height: 20px;
+	background: transparent;
+	border: none;
+	font-weight: bold;
+	font-size: 16px;
+	padding: 0 5px;
+	margin: 0;
+	color: #edffff;
+	text-decoration: none;
+	text-align: right;
 }

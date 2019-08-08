@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 		<meta charset="utf-8">
 		<title>保障性住房展示</title>
 		<!-- Cesium引用 -->
@@ -14,7 +13,8 @@
 			}
 		</style>
 		
-		<link rel="stylesheet" href="/SocialHousingDemo/WebContent/css/popbox.css">		
+		<link rel="stylesheet" href="css/popbox.css">	
+		<script src="css/popbox.js"></script>		
 	</head>
 
 	<body>
@@ -26,23 +26,23 @@
 		<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
 		<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
 		<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
-		<script type="text/javascript" src="/SocialHousingDemo/JavaScript/echart.js"></script>
+		<script type="text/javascript" src="/JavaScript/echart.js"></script>
 		
 		<!-- Cesium控件 -->
 		<div id="cesiumContainer"></div>
-		<script src="/SocialHousingDemo/JavaScript/CesiumContent.js"></script>
+		<script src="/JavaScript/CesiumContent.js"></script>
 	
 		
 		<!-- 图片弹窗控件 -->
-		<script src="/SocialHousingDemo/WebContent/css/popbox.js"></script>
 		<div id="picPopLayer" class="picPopLayer">
 			<div id="picContainer" class="popBox"></div>
-			<div class="close" οnclick="closeBox()">x</div>
+			<div class="close" οnclick="closePicBox()">x</div>
 		</div>
 		
 		<!-- 图表 -->
 		<div id="chartPopLayer" class="chartPopLayer">
-			<div id="echartsContainer" style="height: 100%" class="popBox"> </div>
+			<div id="echartsContainer" class="popBox"></div>
+			<!-- <div class="close" οnclick="closeChart()">x</div> -->
 		</div>
 		
 	</body>

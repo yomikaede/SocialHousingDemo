@@ -16,11 +16,12 @@
 		animation: false
 	});
 	
+	
 	//初始化视角 坐标
 	//西安市区坐标
-	//var initialPosition = new Cesium.Cartesian3.fromDegrees(108.962896,34.270019, 55000.000000);
+	var initialPosition = new Cesium.Cartesian3.fromDegrees(108.962896,34.270019, 55000.000000);
 	//上庄灞柳小区坐标
-	var initialPosition = new Cesium.Cartesian3.fromDegrees(109.0045201705284,34.38019345131998, 2000.000000);
+	//var initialPosition = new Cesium.Cartesian3.fromDegrees(109.0045201705284,34.38019345131998, 2000.000000);
 	var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(0.000000, -90.000000, 0.000000);
 	var homeCameraView = {
 		destination : initialPosition,
@@ -55,95 +56,125 @@
 	});	
 	buildingData.style = heightStyle; */
 
-	//读取小区轮廓kml文件
 	var kmlOptions = {
 		camera : viewer.scene.camera,
 		canvas : viewer.scene.canvas,
 		clampToGround : true
-	};	
-	var boundaryPromise = Cesium.KmlDataSource.load('/SocialHousingDemo/Source/KMLFiles/baliu_bl.kml', kmlOptions);
-	boundaryPromise.then(function(dataSource) {
-        viewer.dataSources.add(dataSource);
-        var boundaryEntities = dataSource.entities.values;
-        for(var i = 0; i < boundaryEntities.length; i++)
-        {
-        	var entity = boundaryEntities[i];
-        	if (Cesium.defined(entity.polyline)) 
-        	{
-        		entity.polyline.material = Cesium.Color.YELLOW;
-        		entity.polyline.width = 5;
-                var polyPositions = entity.polyline.positions.getValue(Cesium.JulianDate.now());
-                var polyCenter = Cesium.BoundingSphere.fromPoints(polyPositions).center;
-                polyCenter = Cesium.Ellipsoid.WGS84.scaleToGeodeticSurface(polyCenter);
-                entity.position = polyCenter;
-                entity.label = {
-                    text : entity.name,
-                    show : true,
-                    showBackground : true,
-                    scale : 0.6,
-                    horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
-                    verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
-                    distanceDisplayCondition : new Cesium.DistanceDisplayCondition(8000.0, 60000.0),
-                    disableDepthTestDistance : 100.0
-                };
-				//TODO: 添加小区描述
-                var description = 'Description here.';
-                entity.description = description;
-        	}
-        }
-    })
+	};
 
-	//读取小区周边kml文件
-	var neighborPromise = Cesium.KmlDataSource.load('/SocialHousingDemo/Source/KMLFiles/baliu_nbhd.kml', kmlOptions);
-    neighborPromise.then(function(dataSource) {
-        viewer.dataSources.add(dataSource);
-        var neighborEntities = dataSource.entities.values;
-        for(var i = 0; i < neighborEntities.length; i++)
-        {
-          var entity = neighborEntities[i];
-          if (Cesium.defined(entity.billboard)) {
-                entity.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM;
-                entity.label = {
-                	text : entity.name,
-                    showBackground : true,
-                    scale : 0.6,
-                    horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
-                    verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
-                    distanceDisplayCondition : new Cesium.DistanceDisplayCondition(10.0, 8000.0),
-                    disableDepthTestDistance : 100.0
-                }
-                entity.billboard.distanceDisplayCondition = new Cesium.DistanceDisplayCondition(10.0, 8000.0);
-                var cartographicPosition = Cesium.Cartographic.fromCartesian(entity.position.getValue(Cesium.JulianDate.now()));
-                var latitude = Cesium.Math.toDegrees(cartographicPosition.latitude);
-                var longitude = Cesium.Math.toDegrees(cartographicPosition.longitude);
-                var description = '<table class="cesium-infoBox-defaultTable cesium-infoBox-defaultTable-lighter"><tbody>' +
-                    '<tr><th>' + "Longitude" + '</th><td>' + longitude.toFixed(5) + '</td></tr>' +
-                    '<tr><th>' + "Latitude" + '</th><td>' + latitude.toFixed(5) + '</td></tr>' +
-                    '</tbody></table>';
-                entity.description = description;
-            }
-        }
-    })
-	
-	//读取建筑kml文件
-	var buildingPromise = Cesium.KmlDataSource.load('/SocialHousingDemo/Source/KMLFiles/baliu_bldg.kml', kmlOptions);
-    buildingPromise.then(function(dataSource) {
-    	viewer.dataSources.add(dataSource);
-        var buildingEntities = dataSource.entities.values;
-        for(var i = 0; i < buildingEntities.length; i++)
-        {
-        	var entity = buildingEntities[i];
-        	if (Cesium.defined(entity.polygon)) 
-        	{
-				//TODO: 添加建筑高度
-        		entity.polygon.extrudedHeight = Math.floor(Math.random()*100)+1;
-				entity.description = "";
+	//读取小区轮廓kml文件
+	function readBoundaryLineKML(url)
+	{
+		var boundaryPromise = Cesium.KmlDataSource.load(url, kmlOptions);
+		boundaryPromise.then(function(dataSource) {
+			viewer.dataSources.add(dataSource);
+			var boundaryEntities = dataSource.entities.values;
+			for(var i = 0; i < boundaryEntities.length; i++)
+			{
+				var entity = boundaryEntities[i];
+				if (Cesium.defined(entity.polyline)) 
+				{
+					entity.polyline.material = Cesium.Color.YELLOW;
+					entity.polyline.width = 5;
+					var polyPositions = entity.polyline.positions.getValue(Cesium.JulianDate.now());
+					var polyCenter = Cesium.BoundingSphere.fromPoints(polyPositions).center;
+					polyCenter = Cesium.Ellipsoid.WGS84.scaleToGeodeticSurface(polyCenter);
+					entity.position = polyCenter;
+					entity.label = {
+						text : entity.name,
+						show : true,
+						showBackground : true,
+						scale : 0.6,
+						horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
+						verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
+						distanceDisplayCondition : new Cesium.DistanceDisplayCondition(8000.0, 60000.0),
+						disableDepthTestDistance : 100.0
+					};
+					//TODO: 添加小区描述
+					var description = 'Description here.';
+					entity.description = description;
+				}
 			}
-        }
-    })
+		})
+	}
+	
+	//读取小区周边kml文件	
+	function readNeighborKML(url)
+	{		
+		var neighborPromise = Cesium.KmlDataSource.load(url, kmlOptions);
+		neighborPromise.then(function(dataSource) {
+			viewer.dataSources.add(dataSource);
+			var neighborEntities = dataSource.entities.values;
+			for(var i = 0; i < neighborEntities.length; i++)
+			{
+			  var entity = neighborEntities[i];
+			  if (Cesium.defined(entity.billboard)) {
+					entity.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM;
+					entity.label = {
+						text : entity.name,
+						showBackground : true,
+						scale : 0.6,
+						horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
+						verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
+						distanceDisplayCondition : new Cesium.DistanceDisplayCondition(10.0, 8000.0),
+						disableDepthTestDistance : 100.0
+					}
+					entity.billboard.distanceDisplayCondition = new Cesium.DistanceDisplayCondition(10.0, 8000.0);
+					var cartographicPosition = Cesium.Cartographic.fromCartesian(entity.position.getValue(Cesium.JulianDate.now()));
+					var latitude = Cesium.Math.toDegrees(cartographicPosition.latitude);
+					var longitude = Cesium.Math.toDegrees(cartographicPosition.longitude);
+					var description = '<table class="cesium-infoBox-defaultTable cesium-infoBox-defaultTable-lighter"><tbody>' +
+						'<tr><th>' + "Longitude" + '</th><td>' + longitude.toFixed(5) + '</td></tr>' +
+						'<tr><th>' + "Latitude" + '</th><td>' + latitude.toFixed(5) + '</td></tr>' +
+						'</tbody></table>';
+					entity.description = description;
+				}
+			}
+		})
+	}
+
+	//读取建筑kml文件
+	function readBuildingKML(url)
+	{
+		var buildingPromise = Cesium.KmlDataSource.load(url, kmlOptions);
+		var floorData = [];
+		buildingPromise.then(function(dataSource) {
+			viewer.dataSources.add(dataSource);
+			var buildingEntities = dataSource.entities.values;
+			for(var i = 0; i < buildingEntities.length; i++)
+			{
+				var entity = buildingEntities[i];
+				if (Cesium.defined(entity.polygon)) 
+				{
+					if (Cesium.defined(entity.kml.extendedData))
+					{
+						var buildingInfo = entity.kml.extendedData;
+						if (floorData[buildingInfo.floor.value + '层'] == undefined)
+						{
+							floorData[buildingInfo.floor.value + '层'] = 0;
+						}
+						floorData[buildingInfo.floor.value + '层'] = floorData[buildingInfo.floor.value + '层'] + 1;
+						entity.polygon.extrudedHeight = buildingInfo.floor.value * 3;
+						entity.description = '<table class="cesium-infoBox-defaultTable"><tbody>' +
+											  '<tr><th>层数</th><td>' + buildingInfo.floor.value + '</td></tr>' +
+											  '</tbody></table>';
+						entity.name = buildingInfo.buildingName.value;					
+						//TODO:根据高度设置颜色
+					}
+				}
+			}
+			createChart(floorData);
+			
+		})
+	}
+	
+	//灞柳小区
+	readBoundaryLineKML('/Source/KMLFiles/baliu_bl.kml');
+	readNeighborKML('/Source/KMLFiles/baliu_nbhd.kml');
+	readBuildingKML('/Source/KMLFiles/baliu_bldg.kml');
 	
 	//选中建筑
-	//TODO: 根据当前kml重做
+	//TODO: 根据当前KML读取重做
 	/* var selectedEntity = new Cesium.Entity();
 	var originColor = Cesium.Color.BLUE;
 	var originFeature = new Cesium.Entity();
@@ -166,7 +197,7 @@
 										  '<tr><th>住户数量</th><td>' + buildingInfo.household.value + '</td></tr>' +
 										  '</tbody></table>';
 			document.getElementById('picContainer').innerHTML = '<img src="/Source/pic/' + buildingInfo.image.value + '"alt="">'
-			popBox();
+			popPicBox();
 		  }
 	}, Cesium.ScreenSpaceEventType.LEFT_CLICK); */
 	
