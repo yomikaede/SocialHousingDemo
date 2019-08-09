@@ -1,7 +1,7 @@
 function popPicBox() {
 	var popLayer = document.getElementById("picPopLayer");
 	popLayer.style.display = "block";
-};
+}
 
 function closePicBox() {
 	var popLayer = document.getElementById("picPopLayer");

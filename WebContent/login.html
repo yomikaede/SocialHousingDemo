@@ -32,11 +32,25 @@
 		<div id="cesiumContainer"></div>
 		<script src="/JavaScript/CesiumContent.js"></script>
 	
-		
+		<div id = "menuLayer">
+			<div class="menu">
+				<div style="position: relative; transform :translateY(120%)">
+					<input name="mode" type="radio" id="overview" /><label for="overview">概览</label>&nbsp;&nbsp;&nbsp;
+					<input name="mode" type="radio" value="building" checked="checked" /><label for="building">建筑</label>&nbsp;&nbsp;&nbsp;
+					<input name="mode" type="radio" value="traffic" /><label for="traffic">交通</label>&nbsp;&nbsp;&nbsp;
+					<input name="mode" type="radio" value="plan" /><label for="plan">规划</label>
+				</div>
+			</div>
+		</div>
+
 		<!-- 图片弹窗控件 -->
 		<div id="picPopLayer" class="picPopLayer">
-			<div id="picContainer" class="popBox"></div>
-			<div class="close" οnclick="closePicBox()">x</div>
+			<div class="close">
+				<a href="javascript:void(0)" Onclick="closePicBox()">x</a>
+			</div>
+			<div id="picContainer" class="popBox">
+				<img id="image" />
+			</div>
 		</div>
 		
 		<!-- 图表控件 -->
