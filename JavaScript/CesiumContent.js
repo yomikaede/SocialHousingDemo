@@ -41,13 +41,16 @@
 			roll : initialOrientation.roll
 		}
 	};	
+
+
 	viewer.scene.camera.setView(homeCameraView);
 	viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
 		e.cancel = true;
 		handlerLMove.setInputAction(onMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 		handlerLClick.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
 		handlerLClick.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-		closePicBox();
+		closePicBox("infoPopLayer");
+		closePicBox("picPopLayer");
 		viewer.selectedEntity = undefined;
 		var menuLayer = document.getElementById("menuLayer");
 		menuLayer.style.display = "none";
@@ -83,6 +86,19 @@
 		canvas : viewer.scene.canvas,
 		//clampToGround : true
 	};
+
+		var villages = ['baliu'];
+	for (var i=0; i<villages.length; i++)
+	{
+		readBoundaryLineKML('/Source/KMLFiles/' + villages[i] + '_bl.kml');
+		readBuildingKML('/Source/KMLFiles/' + villages[i] + '_bldg.kml');
+		readNeighborKML('/Source/KMLFiles/' + villages[i] + '_nbhd.kml');
+	}
+	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+	var handlerLMove = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+
+	handlerLMove.setInputAction(onMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+	handlerLClick.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
 	//读取小区轮廓kml文件
 	function readBoundaryLineKML(url)
@@ -153,6 +169,7 @@
 		neighborPromise.then(function(dataSource) {
 			viewer.dataSources.add(dataSource);
 			dataSourceIndex[dataSource.name+'_nbhd'] = viewer.dataSources.indexOf(dataSource);
+			dataSource.show = false;
 			var neighborEntities = dataSource.entities.values;
 			for(var i = 0; i < neighborEntities.length; i++)
 			{
@@ -195,6 +212,7 @@
 		buildingPromise.then(function(dataSource) {
 			viewer.dataSources.add(dataSource);
 			dataSourceIndex[dataSource.name+'_bldg'] = viewer.dataSources.indexOf(dataSource);
+			dataSource.show = false;
 			var buildingEntities = dataSource.entities.values;
 			for(var i = 0; i < buildingEntities.length; i++)
 			{
@@ -222,7 +240,35 @@
 			
 		})
 	}
-	
+
+	$('input[type="radio"][name="mode"]').change(function(){
+		var mode = $(this).val();
+		if(mode == "overview")
+		{
+			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
+			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
+		}
+		else if(mode == "building")
+		{
+			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=true;
+			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
+		}
+		else if(mode == "traffic")
+		{
+			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
+			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
+		}
+		else if(mode == "service")
+		{
+			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
+			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=true;
+		}
+		else if(mode == "plan")
+		{
+			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
+			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
+		}
+	})
 
 	function isEntity(feature){
 		if (Cesium.defined(feature)) {
@@ -262,12 +308,13 @@
 	            	destination : new Cesium.Cartesian3.fromDegrees(lng, lat, 600),
 	            	orientation : initialOrientation
 	            });
-				readBuildingKML('/Source/KMLFiles/baliu_bldg.kml');
-				readNeighborKML('/Source/KMLFiles/baliu_nbhd.kml');
+				selectedVillage = selectedEntity.kml.extendedData.village.value;
+				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
+				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
+				$('input:radio[name="mode"][value="overview"]').prop("checked", "checked");
 				handlerLMove.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 				handlerLClick.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
 				selectedEntity.polygon.material = new Cesium.Color(1,1,1,0);
-				selectedVillage = selectedEntity.kml.extendedData.village.value;
 				handlerLClick.setInputAction(onLeftClickBldg, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 				var menuLayer = document.getElementById("menuLayer");
 				menuLayer.style.display = "block";
@@ -283,17 +330,15 @@
 			if (selectedEntity instanceof Cesium.Entity) {
 				var buildingImg = document.getElementById("image");
 				buildingImg.src = '/Source/pic/' + 'baliu_001.jpg';
-				popPicBox();
+				popPicBox("picPopLayer");
+				document.getElementById("information").innerHTML="<table><tr><th>" + "表头1" + "</th><th>" + "表头2"
+				+ "</th></tr><tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr></table>";
+				popPicBox("infoPopLayer");
 		    }
   		}
 	}
 
-	readBoundaryLineKML('/Source/KMLFiles/baliu_bl.kml');
-	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
-	var handlerLMove = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 
-	handlerLMove.setInputAction(onMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-	handlerLClick.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 	
 	//选中建筑
 	//TODO: 根据当前KML读取重做

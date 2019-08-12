@@ -5,6 +5,7 @@
 		<title>保障性住房展示</title>
 		<!-- Cesium引用 -->
 		<script src="https://cesiumjs.org/releases/1.59/Build/Cesium/Cesium.js"></script>
+		<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
 		<link href="https://cesiumjs.org/releases/1.59/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 		<style>
 			@import url(https://cesiumjs.org/releases/1.59/Build/Cesium/Widgets/widgets.css);
@@ -30,23 +31,30 @@
 		
 		<!-- Cesium控件 -->
 		<div id="cesiumContainer"></div>
-		<script src="/JavaScript/CesiumContent.js"></script>
 	
-		<div id = "menuLayer">
+		<div id="menuLayer">
 			<div class="menu">
 				<div style="position: relative; transform :translateY(120%)">
-					<input name="mode" type="radio" id="overview" /><label for="overview">概览</label>&nbsp;&nbsp;&nbsp;
-					<input name="mode" type="radio" value="building" checked="checked" /><label for="building">建筑</label>&nbsp;&nbsp;&nbsp;
-					<input name="mode" type="radio" value="traffic" /><label for="traffic">交通</label>&nbsp;&nbsp;&nbsp;
-					<input name="mode" type="radio" value="plan" /><label for="plan">规划</label>
+					<input name="mode" type="radio" id="overview" value="overview" /><label for="overview">概览</label>&nbsp;&nbsp;&nbsp;
+					<input name="mode" type="radio" id="building" value="building" checked="checked" /><label for="building">建筑</label>&nbsp;&nbsp;&nbsp;
+					<input name="mode" type="radio" id="traffic" value="traffic" /><label for="traffic">交通</label>&nbsp;&nbsp;&nbsp;
+					<input name="mode" type="radio" id="service" value="service" /><label for="service">公服设施</label>&nbsp;&nbsp;&nbsp;
+					<input name="mode" type="radio" id="plan" value="plan" /><label for="plan">规划</label>
 				</div>
 			</div>
 		</div>
 
-		<!-- 图片弹窗控件 -->
-		<div id="picPopLayer" class="picPopLayer">
+		<div id="infoPopLayer" class="PopLayer">
 			<div class="close">
-				<a href="javascript:void(0)" Onclick="closePicBox()">x</a>
+				<a href="javascript:void(0)" Onclick="closePicBox('infoPopLayer')">x</a>
+			</div>
+			<div id="information" class="popBox"></div>
+		</div>
+
+		<!-- 图片弹窗控件 -->
+		<div id="picPopLayer" class="PopLayer">
+			<div class="close">
+				<a href="javascript:void(0)" Onclick="closePicBox('picPopLayer')">x</a>
 			</div>
 			<div id="picContainer" class="popBox">
 				<img id="image" />
@@ -58,6 +66,6 @@
 			<div id="echartsContainer" class="popBox"></div>
 			<!-- <div class="close" οnclick="closeChart()">x</div> -->
 		</div>
-		
+		<script src="/JavaScript/CesiumContent.js"></script>
 	</body>
 </html>
