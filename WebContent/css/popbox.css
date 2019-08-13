@@ -33,31 +33,16 @@ input {
 	background: rgba(38, 38, 38, 0.95);
 	color: #edffff;
 	border: 1px solid #444;
-	border-right: none;
-	border-top-left-radius: 7px;
-	border-bottom-left-radius: 7px;
+	border-radius: 7px;
 	box-shadow: 0 0 10px 1px #000;
+	text-align: right;
+	padding: 10px;
+	padding-top: 3px;
 }
 
-.PopLayer .close {
-	display: block;
-	position: absolute;
-	z-index: 11;
-	top: 5px;
-	right: 5px;
-	height: 20px;
-	background: transparent;
-	border: none;
+.PopLayer a {
 	font-weight: bold;
 	font-size: 16px;
-	padding: 0 5px;
-	margin: 0;
-	color: #edffff;
-	text-decoration: none;
-	text-align: right;
-}
-
-.PopLayer .close a {
     text-decoration: none;
     color: #edffff;
 }
@@ -75,11 +60,11 @@ input {
 #infoPopLayer {
 	top: 20px;
 	left: 10px;
-	width: 440px;
 }
 
 #infoPopLayer table{
-	width: 100%;
+	text-align: center;
+	width: 400px;
 }
 
 #infoPopLayer th{
@@ -89,14 +74,17 @@ input {
 
 #infoPopLayer td{
 	background: rgba(200, 200, 255, 1);
-	text-align: center;
+}
+
+#descPopLayer {
+	top: 50px;
+	right: 10px;
+	width: 400px;
 }
 
 #picPopLayer {
 	bottom: 20px;
 	right: 10px;
-	width: 440px;
-	height: 340px;
 }
 
 

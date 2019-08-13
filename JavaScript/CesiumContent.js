@@ -9,6 +9,8 @@
 		baseLayerPicker : false,
 		timeline : false,
 		scene3DOnly : true,
+		selectionIndicator: false,
+		infoBox: false,
 		imageryProvider: new Cesium.UrlTemplateImageryProvider({
 			//谷歌地图影像图层
 			url:"http://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}&s=Gali"
@@ -46,6 +48,7 @@
 	viewer.scene.camera.setView(homeCameraView);
 	viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
 		e.cancel = true;
+		handlerLMove.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 		handlerLMove.setInputAction(onMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 		handlerLClick.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
 		handlerLClick.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
@@ -87,7 +90,7 @@
 		//clampToGround : true
 	};
 
-		var villages = ['baliu'];
+	var villages = ['baliu'];
 	for (var i=0; i<villages.length; i++)
 	{
 		readBoundaryLineKML('/Source/KMLFiles/' + villages[i] + '_bl.kml');
@@ -155,8 +158,7 @@
 					};*/
 					viewer.scene.postProcessStages.fxaa.enabled = false;
 					//TODO: 添加小区描述
-					var description = 'Description here.';
-					entity.description = description;
+					entity.description = undefined;
 				}
 			}
 		})
@@ -221,6 +223,7 @@
 				{
 					if (Cesium.defined(entity.kml.extendedData))
 					{
+						entity.polygon.material = Cesium.Color.WHITE;
 						var buildingInfo = entity.kml.extendedData;
 						if (floorData[buildingInfo.floor.value + '层'] == undefined)
 						{
@@ -241,12 +244,24 @@
 		})
 	}
 
-	$('input[type="radio"][name="mode"]').change(function(){
+	$('input[type="radio"][name="mode"]').change(function modechange(){
 		var mode = $(this).val();
 		if(mode == "overview")
 		{
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
+			//根据selectvillage得到概览内容，填入infoPopLayer中的表格内
+			document.getElementById("infoPopLayer").innerHTML=
+				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
+				+ "<table>" 
+				+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
+				+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
+				+ "</table>";
+			popPicBox("infoPopLayer");
+			document.getElementById("descPopLayer").innerHTML=
+				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('descPopLayer')\">x</a><br/>"
+				+ "description here";
+			popPicBox("descPopLayer");
 		}
 		else if(mode == "building")
 		{
@@ -268,7 +283,7 @@
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
 		}
-	})
+	});
 
 	function isEntity(feature){
 		if (Cesium.defined(feature)) {
@@ -312,14 +327,56 @@
 				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
 				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
 				$('input:radio[name="mode"][value="overview"]').prop("checked", "checked");
+
+				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
+				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
+				//根据selectvillage得到概览内容，填入infoPopLayer中的表格内
+				document.getElementById("infoPopLayer").innerHTML=
+					"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
+					+ "<table>" 
+					+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
+					+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
+					+ "</table>";
+				popPicBox("infoPopLayer");
+				document.getElementById("descPopLayer").innerHTML=
+					"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('descPopLayer')\">x</a><br/>"
+					+ "description here";
+				popPicBox("descPopLayer");
+
 				handlerLMove.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 				handlerLClick.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
 				selectedEntity.polygon.material = new Cesium.Color(1,1,1,0);
 				handlerLClick.setInputAction(onLeftClickBldg, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+				handlerLClick.setInputAction(onMouseMoveBldg, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+				
 				var menuLayer = document.getElementById("menuLayer");
 				menuLayer.style.display = "block";
 		    }
   		}
+	}
+
+	function isBuilding(feature){
+		if (Cesium.defined(feature)) {
+			var entity = Cesium.defaultValue(feature.id, feature.primitive.id);
+			if ((entity instanceof Cesium.Entity)&&(Cesium.defined(entity.polygon.extrudedHeight)))
+				return true;
+		}
+		return false;
+	}
+
+	function onMouseMoveBldg(movement) {
+	    var startFeature = viewer.scene.pick(movement.startPosition);
+	    var endFeature = viewer.scene.pick(movement.endPosition);
+	    var startFlag = isBuilding(startFeature);
+	    var endFlag = isBuilding(endFeature);
+	    if(startFlag && endFlag && (startFeature!=endFeature)){
+	    	startFeature.id.polygon.material = Cesium.Color.WHITE;
+	    	endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
+	    }
+		if(startFlag && (!endFlag))
+			startFeature.id.polygon.material = Cesium.Color.WHITE;
+		if((!startFlag) && endFlag)
+			endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
 	}
 
 	//小区内左键单击选择建筑
@@ -328,11 +385,16 @@
     	if (Cesium.defined(pickedFeature)) {
 		    selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
 			if (selectedEntity instanceof Cesium.Entity) {
-				var buildingImg = document.getElementById("image");
-				buildingImg.src = '/Source/pic/' + 'baliu_001.jpg';
+				document.getElementById("picPopLayer").innerHTML=
+				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('picPopLayer')\">x</a><br/>"
+				+ "<img src = '/Source/pic/baliu_001.jpg'/>";
 				popPicBox("picPopLayer");
-				document.getElementById("information").innerHTML="<table><tr><th>" + "表头1" + "</th><th>" + "表头2"
-				+ "</th></tr><tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr></table>";
+				document.getElementById("infoPopLayer").innerHTML=
+				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
+				+ "<table>" 
+				+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
+				+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
+				+ "</table>";
 				popPicBox("infoPopLayer");
 		    }
   		}
