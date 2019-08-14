@@ -116,7 +116,7 @@
 				var entity = boundaryEntities[i];
 				if (Cesium.defined(entity.polygon)) 
 				{
-					entity.polygon.material = new Cesium.Color(1,1,1,0.1);
+					entity.polygon.material = Cesium.Color.WHITE;
 					entity.polygon.outline = true;
 					entity.polygon.outlineColor = Cesium.Color.YELLOW;
 					entity.polygon.outlineWidth = 10;
@@ -248,6 +248,7 @@
 		var mode = $(this).val();
 		if(mode == "overview")
 		{
+			closePicBox("hoverPopLayer");
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
 			//根据selectvillage得到概览内容，填入infoPopLayer中的表格内
@@ -265,21 +266,25 @@
 		}
 		else if(mode == "building")
 		{
+			closePicBox("hoverPopLayer");
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=true;
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
 		}
 		else if(mode == "traffic")
 		{
+			closePicBox("hoverPopLayer");
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
 		}
 		else if(mode == "service")
 		{
+			closePicBox("hoverPopLayer");
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=true;
 		}
 		else if(mode == "plan")
 		{
+			closePicBox("hoverPopLayer");
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
 		}
@@ -300,13 +305,36 @@
 	    var startFlag = isEntity(startFeature);
 	    var endFlag = isEntity(endFeature);
 	    if(startFlag && endFlag && (startFeature!=endFeature)){
-	    	startFeature.id.polygon.material = new Cesium.Color(1, 1, 1, 0.1);
-	    	endFeature.id.polygon.material = Cesium.Color.WHITE;
+	    	startFeature.id.polygon.material = Cesium.Color.WHITE;
+	    	endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
+	    	var hover = document.getElementById("hoverPopLayer");
+	    	hover.style.left = movement.endPosition.x + "px";
+	    	hover.style.top = movement.endPosition.y + "px";
+	    	hover.innerHTML=
+	    	"<table>" 
+			+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
+			+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
+			+ "</table>";
+	    	popPicBox("hoverPopLayer");
 	    }
 		if(startFlag && (!endFlag))
-			startFeature.id.polygon.material = new Cesium.Color(1, 1, 1, 0.1);
+		{
+			startFeature.id.polygon.material = Cesium.Color.WHITE;
+			closePicBox("hoverPopLayer");
+		}
 		if((!startFlag) && endFlag)
-			endFeature.id.polygon.material = Cesium.Color.WHITE;
+		{
+			endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
+	    	var hover = document.getElementById("hoverPopLayer");
+	    	hover.style.left = movement.endPosition.x + "px";
+	    	hover.style.top = movement.endPosition.y + "px";
+	    	hover.innerHTML=
+	    	"<table>" 
+			+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
+			+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
+			+ "</table>";
+	    	popPicBox("hoverPopLayer");
+		}
 	}
 
 	//左键单击选中进入小区
@@ -315,6 +343,7 @@
     	if (Cesium.defined(pickedFeature)) {
 		    selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
 			if (selectedEntity instanceof Cesium.Entity) {
+				closePicBox("hoverPopLayer");
 	            var polyCenter = selectedEntity.position.getValue();
 	            var cartographic=Cesium.Cartographic.fromCartesian(polyCenter);
 				var lat = Cesium.Math.toDegrees(cartographic.latitude);
@@ -327,7 +356,6 @@
 				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
 				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
 				$('input:radio[name="mode"][value="overview"]').prop("checked", "checked");
-
 				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
 				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
 				//根据selectvillage得到概览内容，填入infoPopLayer中的表格内
@@ -372,11 +400,34 @@
 	    if(startFlag && endFlag && (startFeature!=endFeature)){
 	    	startFeature.id.polygon.material = Cesium.Color.WHITE;
 	    	endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
+	    	var hover = document.getElementById("hoverPopLayer");
+	    	hover.style.left = movement.endPosition.x + "px";
+	    	hover.style.top = movement.endPosition.y + "px";
+	    	hover.innerHTML=
+	    	"<table>" 
+			+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
+			+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
+			+ "</table>";
+	    	popPicBox("hoverPopLayer");
 	    }
 		if(startFlag && (!endFlag))
+		{
 			startFeature.id.polygon.material = Cesium.Color.WHITE;
+			closePicBox("hoverPopLayer");
+		}
 		if((!startFlag) && endFlag)
+		{
 			endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
+	    	var hover = document.getElementById("hoverPopLayer");
+	    	hover.style.left = movement.endPosition.x + "px";
+	    	hover.style.top = movement.endPosition.y + "px";
+	    	hover.innerHTML=
+	    	"<table>" 
+			+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
+			+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
+			+ "</table>";
+	    	popPicBox("hoverPopLayer");
+	    }
 	}
 
 	//小区内左键单击选择建筑
