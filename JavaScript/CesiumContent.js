@@ -64,7 +64,6 @@
 		viewer.scene.camera.flyTo(homeCameraView);
 	});
 
-
 	//读取3dtiles（建筑科技大学demo）	
 	/* var buildingData = viewer.scene.primitives.add(
 	  new Cesium.Cesium3DTileset({
@@ -310,6 +309,16 @@
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
+			connection.query("SELECT * FROM student", function(err,result){
+				if(err)
+				{
+					throw err
+				}
+				else
+				{
+					console.log(result);
+				}
+			})
 	    	hover.innerHTML=
 	    	"<table>" 
 			+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
