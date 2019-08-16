@@ -309,21 +309,16 @@
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
-			connection.query("SELECT * FROM student", function(err,result){
-				if(err)
-				{
-					throw err
-				}
-				else
-				{
-					console.log(result);
-				}
-			})
-	    	hover.innerHTML=
-	    	"<table>" 
-			+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
-			+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
-			+ "</table>";
+	    	$.getJSON("/get?name=LiLinlin", function(json){
+	    		var tableHtml = "<table>";
+			    for(var i in json){
+			        tableHtml += "<tr>";
+			        tableHtml += ("<td>" + i + "</td><td>" + json[i] + "<td>");
+			        tableHtml += "</tr>";
+        		}
+        		tableHtml += "</table>";
+        		hover.innerHTML = tableHtml;
+	    	});
 	    	popPicBox("hoverPopLayer");
 	    }
 		if(startFlag && (!endFlag))
@@ -337,11 +332,17 @@
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
-	    	hover.innerHTML=
-	    	"<table>" 
-			+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
-			+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
-			+ "</table>";
+	    	$.getJSON("/get?name=LiLinlin", function(json){
+	    		var tableHtml = "<table>";
+			    for(var i in json){
+			        tableHtml += "<tr>";
+			        tableHtml += ("<td>" + i + "</td><td>" + json[i] + "<td>");
+			        tableHtml += "</tr>";
+        		}
+        		tableHtml += "</table>";
+        		hover.innerHTML = tableHtml;
+	    	});
+	    	//loadXMLHover("name=LiLinlin");
 	    	popPicBox("hoverPopLayer");
 		}
 	}
@@ -459,35 +460,5 @@
 		    }
   		}
 	}
-
-
-	
-	//选中建筑
-	//TODO: 根据当前KML读取重做
-	/* var selectedEntity = new Cesium.Entity();
-	var originColor = Cesium.Color.BLUE;
-	var originFeature = new Cesium.Entity();
-	
-	viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
-		  originFeature.color = originColor;
-		  var pickedFeature = viewer.scene.pick(movement.position);
-		  if(Cesium.defined(pickedFeature))
-		  {
-			originColor = pickedFeature.color;
-			pickedFeature.color = Cesium.Color.BLUE;	
-			originFeature = pickedFeature;
-			selectedEntity.name='建筑详情';
-			viewer.selectedEntity = selectedEntity;
-			var buildingID = dictionary[pickedFeature.getProperty('id')];
-			var buildingInfo = geoEntities.getById(buildingID).kml.extendedData;
-			selectedEntity.description = '<table class="cesium-infoBox-defaultTable"><tbody>' +
-										  '<tr><th>楼号</th><td>' + buildingInfo.buildingID.value + '</td></tr>' +
-										  '<tr><th>层高</th><td>' + buildingInfo.floor.value + '</td></tr>' +
-										  '<tr><th>住户数量</th><td>' + buildingInfo.household.value + '</td></tr>' +
-										  '</tbody></table>';
-			document.getElementById('picContainer').innerHTML = '<img src="/Source/pic/' + buildingInfo.image.value + '"alt="">'
-			popPicBox();
-		  }
-	}, Cesium.ScreenSpaceEventType.LEFT_CLICK); */
 	
 }());

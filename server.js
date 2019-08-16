@@ -16,12 +16,6 @@
         database:'mydatabase'
     });
     connection.connect();
-    var sql = 'SELECT * FROM student';
-    connection.query(sql, function(error, results){
-        if(error)
-            throw error;
-        console.log('the solution is: ', results);
-    })
 
     var yargs = require('yargs').options({
         'port' : {
@@ -106,6 +100,18 @@
             bypassUpstreamProxyHosts[host.toLowerCase()] = true;
         });
     }
+
+    app.get('/get', function(req, res, next) {
+        var params = url.parse(req.url, true).query;
+        var sql = 'SELECT * FROM student WHERE name =\'' + params.name +'\'';
+        connection.query(sql, function(error, results){
+            if(error) throw error;            
+            //res.statusCode(200);
+            res.send(results[0]);
+
+            console.log(results);
+        })
+    })
 
     app.get('/proxy/*', function(req, res, next) {
         // look for request like http://localhost:8080/proxy/http://example.com/file?query=1

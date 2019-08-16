@@ -62,7 +62,8 @@ input {
 	left: 10px;
 }
 
-#infoPopLayer table{
+.PopLayer table{
+	border: 1px;
 	text-align: center;
 	width: 400px;
 }
