@@ -64,38 +64,40 @@
 		viewer.scene.camera.flyTo(homeCameraView);
 	});
 
-	//读取3dtiles（建筑科技大学demo）	
-	/* var buildingData = viewer.scene.primitives.add(
-	  new Cesium.Cesium3DTileset({
-		  url:'/Source/3dtiles/tileset.json'
-	  })
-	);
-	var heightStyle = new Cesium.Cesium3DTileStyle({
-		color : {
-			conditions : [
-				["${floor} >= 20", "rgba(45, 0, 75, 0.5)"],
-				["${floor} >= 15", "rgb(102, 71, 151)"],
-				["${floor} >= 10", "rgb(170, 162, 204)"],
-				["${floor} >= 5", "rgb(224, 226, 238)"],
-				["true", "rgb(127, 59, 8)"]
-			]
-		}
-	});	
-	buildingData.style = heightStyle; */
-
 	var kmlOptions = {
 		camera : viewer.scene.camera,
 		canvas : viewer.scene.canvas,
 		//clampToGround : true
 	};
 
-	var villages = ['XM61010000000088'];
-	for (var i=0; i<villages.length; i++)
+	//获取小区信息
+	
+	var villages = [];
+	
+	
+	function getInfo(sql){
+		return new Promise(function(resolve, reject){
+			$.getJSON("/get?command=" + sql, function(json){
+				resolve(json);
+			});	
+		})
+    	
+	};
+	
+	getInfo("SELECT 项目编号 FROM 小区总表").then(function(value){	
+		for(var obj in value)
+		{
+			villages.push(value[obj].项目编号);
+		}	
+	});	
+	
+	for (var i = 0; i < villages.length; i++)
 	{
 		readBoundaryLineKML('/Source/KMLFiles/' + villages[i] + '_bl.kml');
 		readBuildingKML('/Source/KMLFiles/' + villages[i] + '_bldg.kml');
 		readNeighborKML('/Source/KMLFiles/' + villages[i] + '_nbhd.kml');
 	}
+	
 	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 	var handlerLMove = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 
@@ -156,7 +158,6 @@
 				        pixelOffset:new Cesium.Cartesian2(0,-16)            //偏移
 					};*/
 					viewer.scene.postProcessStages.fxaa.enabled = false;
-					//TODO: 添加小区描述
 					entity.description = undefined;
 				}
 			}
@@ -243,6 +244,7 @@
 		})
 	}
 
+	//选择框
 	$('input[type="radio"][name="mode"]').change(function modechange(){
 		var mode = $(this).val();
 		if(mode == "overview")
@@ -257,10 +259,12 @@
 				+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
 				+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
 				+ "</table>";
+			
 			popPicBox("infoPopLayer");
 			document.getElementById("descPopLayer").innerHTML=
 				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('descPopLayer')\">x</a><br/>"
 				+ "description here";
+			//TODO:小区描述
 			popPicBox("descPopLayer");
 		}
 		else if(mode == "building")
@@ -298,19 +302,23 @@
 		return false;
 	}
 
-	function getInfo(sql, elementId){
+	//读取sql信息
+	
+	
+	function getInfoToChart(sql, elementId){
     	$.getJSON("/get?command=" + sql, function(json){
     		var tableHtml = "<table>";
-		    for(var i in json){
+		    for(var obj in json){
 		        tableHtml += "<tr>";
-		        tableHtml += ("<td>" + i + "</td><td>" + json[i] + "<td>");
+		        tableHtml += ("<td>" + obj + "</td><td>" + json[obj] + "<td>");
 		        tableHtml += "</tr>";
     		}
     		tableHtml += "</table>";
     		document.getElementById(elementId).innerHTML = tableHtml;
     	});
 	}
-
+	
+	//悬停小区信息
 	function onMouseMove(movement) {
 	    var startFeature = viewer.scene.pick(movement.startPosition);
 	    var endFeature = viewer.scene.pick(movement.endPosition);
@@ -323,7 +331,7 @@
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
 	    	var command = "SELECT * FROM 小区总表 WHERE 项目编号 = '" + endFeature.id.kml.extendedData.village.value + "'";
-	    	getInfo(command, "hoverPopLayer");
+	    	getInfoToChart(command, "hoverPopLayer");
 	    	popPicBox("hoverPopLayer");
 	    }
 		if(startFlag && (!endFlag))
@@ -338,7 +346,7 @@
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
 	    	var command = "SELECT * FROM 小区总表 WHERE 项目编号 = '" + endFeature.id.kml.extendedData.village.value + "'";
-	    	getInfo(command, "hoverPopLayer");
+	    	getInfoToChart(command, "hoverPopLayer");
 	    	popPicBox("hoverPopLayer");
 		}
 	}

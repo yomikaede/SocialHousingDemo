@@ -110,7 +110,8 @@
             {
                 throw error;    
             }
-            res.send(results[0]);
+			console.log(results);
+            res.send(results);
         })
     })
 
