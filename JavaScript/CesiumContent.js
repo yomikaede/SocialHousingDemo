@@ -89,7 +89,7 @@
 		//clampToGround : true
 	};
 
-	var villages = ['baliu'];
+	var villages = ['XM61010000000088'];
 	for (var i=0; i<villages.length; i++)
 	{
 		readBoundaryLineKML('/Source/KMLFiles/' + villages[i] + '_bl.kml');
@@ -298,6 +298,19 @@
 		return false;
 	}
 
+	function getInfo(sql, elementId){
+    	$.getJSON("/get?command=" + sql, function(json){
+    		var tableHtml = "<table>";
+		    for(var i in json){
+		        tableHtml += "<tr>";
+		        tableHtml += ("<td>" + i + "</td><td>" + json[i] + "<td>");
+		        tableHtml += "</tr>";
+    		}
+    		tableHtml += "</table>";
+    		document.getElementById(elementId).innerHTML = tableHtml;
+    	});
+	}
+
 	function onMouseMove(movement) {
 	    var startFeature = viewer.scene.pick(movement.startPosition);
 	    var endFeature = viewer.scene.pick(movement.endPosition);
@@ -309,16 +322,8 @@
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
-	    	$.getJSON("/get?name=LiLinlin", function(json){
-	    		var tableHtml = "<table>";
-			    for(var i in json){
-			        tableHtml += "<tr>";
-			        tableHtml += ("<td>" + i + "</td><td>" + json[i] + "<td>");
-			        tableHtml += "</tr>";
-        		}
-        		tableHtml += "</table>";
-        		hover.innerHTML = tableHtml;
-	    	});
+	    	var command = "SELECT * FROM 小区总表 WHERE 项目编号 = '" + endFeature.id.kml.extendedData.village.value + "'";
+	    	getInfo(command, "hoverPopLayer");
 	    	popPicBox("hoverPopLayer");
 	    }
 		if(startFlag && (!endFlag))
@@ -332,17 +337,8 @@
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
-	    	$.getJSON("/get?name=LiLinlin", function(json){
-	    		var tableHtml = "<table>";
-			    for(var i in json){
-			        tableHtml += "<tr>";
-			        tableHtml += ("<td>" + i + "</td><td>" + json[i] + "<td>");
-			        tableHtml += "</tr>";
-        		}
-        		tableHtml += "</table>";
-        		hover.innerHTML = tableHtml;
-	    	});
-	    	//loadXMLHover("name=LiLinlin");
+	    	var command = "SELECT * FROM 小区总表 WHERE 项目编号 = '" + endFeature.id.kml.extendedData.village.value + "'";
+	    	getInfo(command, "hoverPopLayer");
 	    	popPicBox("hoverPopLayer");
 		}
 	}

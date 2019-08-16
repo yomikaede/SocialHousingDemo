@@ -103,13 +103,14 @@
 
     app.get('/get', function(req, res, next) {
         var params = url.parse(req.url, true).query;
-        var sql = 'SELECT * FROM student WHERE name =\'' + params.name +'\'';
+        var sql = params.command;
+        console.log(sql);
         connection.query(sql, function(error, results){
-            if(error) throw error;            
-            //res.statusCode(200);
+            if(error) 
+            {
+                throw error;    
+            }
             res.send(results[0]);
-
-            console.log(results);
         })
     })
 

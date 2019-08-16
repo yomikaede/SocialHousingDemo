@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <kml xmlns:kml="http://earth.google.com/kml/2.2">
   <Document id="Neighbourhood">
-    <name>baliu_bl</name>
+    <name>XM61010000000088_bl</name>
 <Style id="defaultStyle">
   <LineStyle>
     <width>1.5</width>
@@ -14,7 +14,7 @@
       <styleUrl>#defaultStyle</styleUrl>
       <name>上庄灞柳小区</name>
       <ExtendedData>
-        <Data name="village"><value>baliu</value></Data>
+        <Data name="village"><value>XM61010000000088</value></Data>
       </ExtendedData>>
       <Polygon>
         <outerBoundaryIs>
