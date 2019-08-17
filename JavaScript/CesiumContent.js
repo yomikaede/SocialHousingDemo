@@ -13,7 +13,7 @@
 		infoBox: false,
 		imageryProvider: new Cesium.UrlTemplateImageryProvider({
 			//谷歌地图影像图层
-			url:"http://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}&s=Gali"
+			url:"http://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}&s=Gali",
 		}),
 		animation: false
 	});
@@ -24,6 +24,14 @@
 	//scene.screenSpaceCameraController.enableTilt = false;
 	//scene.screenSpaceCameraController.enableLook = false;
 	viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+	
+	var layers = viewer.scene.imageryLayers;
+	var darkblue = layers.addImageryProvider(new Cesium.SingleTileImageryProvider({
+		url : '/source/pic/darkblue.jpg',
+	}));
+	
+	darkblue.alpha = 0.9;
+	//darkblue.brightness = 2.0;
 	
 	var selectedEntity = undefined;
 	var originEntity = undefined;
@@ -64,6 +72,14 @@
 		viewer.scene.camera.flyTo(homeCameraView);
 	});
 
+/* 	var layers = viewer.scene.imageryLayers;
+	var blackMarble = layers.addImageryProvider(new Cesium.createTileMapServiceImageryProvider({
+		url : 'http://cesiumjs.org/tilesets/imagery/blackmarble',
+		maximumLevel : 8,
+		credit : 'Black Marble imagery courtesy NASA Earth Observatory'
+	})); */
+
+
 	var kmlOptions = {
 		camera : viewer.scene.camera,
 		canvas : viewer.scene.canvas,
@@ -72,24 +88,8 @@
 
 	//获取小区信息
 	
-	var villages = [];
+	var villages = ['XM61010000000088'];
 	
-	
-	function getInfo(sql){
-		return new Promise(function(resolve, reject){
-			$.getJSON("/get?command=" + sql, function(json){
-				resolve(json);
-			});	
-		})
-    	
-	};
-	
-	getInfo("SELECT 项目编号 FROM 小区总表").then(function(value){	
-		for(var obj in value)
-		{
-			villages.push(value[obj].项目编号);
-		}	
-	});	
 	
 	for (var i = 0; i < villages.length; i++)
 	{
@@ -231,6 +231,8 @@
 						}
 						floorData[buildingInfo.floor.value + '层'] = floorData[buildingInfo.floor.value + '层'] + 1;
 						entity.polygon.extrudedHeight = buildingInfo.floor.value * 3;
+						entity.polygon.material = Cesium.Color.YELLOW;
+						entity.polygon.outline = false;
 						entity.description = '<table class="cesium-infoBox-defaultTable"><tbody>' +
 											  '<tr><th>层数</th><td>' + buildingInfo.floor.value + '</td></tr>' +
 											  '</tbody></table>';
@@ -302,21 +304,25 @@
 		return false;
 	}
 
-	//读取sql信息
+	//读取sql信息	
+	function getInfo(sql){
+		return new Promise(function(resolve, reject){
+			$.getJSON("/get?command=" + sql, function(json){
+				resolve(json);
+			});	
+		})   	
+	};
 	
-	
-	function getInfoToChart(sql, elementId){
-    	$.getJSON("/get?command=" + sql, function(json){
-    		var tableHtml = "<table>";
-		    for(var obj in json){
-		        tableHtml += "<tr>";
-		        tableHtml += ("<td>" + obj + "</td><td>" + json[obj] + "<td>");
-		        tableHtml += "</tr>";
-    		}
-    		tableHtml += "</table>";
-    		document.getElementById(elementId).innerHTML = tableHtml;
-    	});
-	}
+	function JsonToChart(json, elementId){
+    	var tableHtml = "<table>";
+		for(var obj in json){
+		    tableHtml += "<tr>";
+		    tableHtml += ("<td>" + obj + "</td><td>" + json[obj] + "<td>");
+		    tableHtml += "</tr>";
+    	}
+    	tableHtml += "</table>";
+    	document.getElementById(elementId).innerHTML = tableHtml;
+    };
 	
 	//悬停小区信息
 	function onMouseMove(movement) {
@@ -331,13 +337,17 @@
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
 	    	var command = "SELECT * FROM 小区总表 WHERE 项目编号 = '" + endFeature.id.kml.extendedData.village.value + "'";
-	    	getInfoToChart(command, "hoverPopLayer");
-	    	popPicBox("hoverPopLayer");
+			popPicBox("hoverPopLayer");
+			getInfo(command).then(function(value){
+				JsonToChart(value[0], "hoverPopLayer");
+			});
+			document.getElementById("cesiumContainer").style.cursor = "pointer";
 	    }
 		if(startFlag && (!endFlag))
 		{
 			startFeature.id.polygon.material = Cesium.Color.WHITE;
 			closePicBox("hoverPopLayer");
+			document.getElementById("cesiumContainer").style.cursor = "default";
 		}
 		if((!startFlag) && endFlag)
 		{
@@ -346,8 +356,11 @@
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
 	    	var command = "SELECT * FROM 小区总表 WHERE 项目编号 = '" + endFeature.id.kml.extendedData.village.value + "'";
-	    	getInfoToChart(command, "hoverPopLayer");
-	    	popPicBox("hoverPopLayer");
+			popPicBox("hoverPopLayer");
+			getInfo(command).then(function(value){
+				JsonToChart(value[0], "hoverPopLayer");
+			});
+			document.getElementById("cesiumContainer").style.cursor = "pointer";
 		}
 	}
 
