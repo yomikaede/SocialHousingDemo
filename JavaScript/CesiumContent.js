@@ -102,10 +102,10 @@
 		readBuildingKML('/Source/KMLFiles/' + villages[i] + '_bldg.kml');
 	}
 
-	var entryCollection = new Cesium.EntityCollection();
-	var trafficCollection = new Cesium.EntityCollection();
-	var buildingCollection = new Cesium.EntityCollection();
-	var serviceCollection = new Cesium.EntityCollection();
+	var entryData = new Cesium.CustomDataSource();
+	var trafficData = new Cesium.CustomDataSource();
+	var buildingData = new Cesium.CustomDataSource();
+	var serviceData = new Cesium.CustomDataSource();
 
 	var command = "";
 	for(var list in publicService)
@@ -124,7 +124,7 @@
 				}
 				description += "</table>";
 				var entity = new Cesium.Entity({
-					position: Cesium.Cartesian3.fromDegrees(obj.经度, obj.纬度),	
+					position: Cesium.Cartesian3.fromDegrees(obj.经度-0.005, obj.纬度+0.0014),	
 				    point: {
 				        pixelSize : 3,
 				        color : Cesium.Color.RED,
@@ -137,17 +137,17 @@
 						scale : 0.6,
 						horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
 						verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
-						distanceDisplayCondition : new Cesium.DistanceDisplayCondition(10.0, 8000.0),
+						//distanceDisplayCondition : new Cesium.DistanceDisplayCondition(10.0, 8000.0),
 				        pixelOffset:new Cesium.Cartesian2(0,-5)            //偏移
 					},
 					description: description
 				});
-				serviceCollection.add(entity);
-				viewer.entities.add(entity);
-				console.log(serviceCollection.contains(entity));
+				serviceData.entities.add(entity);
 			}
 		});
 	}
+	viewer.dataSources.add(serviceData);
+	serviceData.show = false;
 	
 
 	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
@@ -452,6 +452,7 @@
 				viewer.scene.camera.flyTo(destinationView);
 				selectedVillage = selectedEntity.kml.extendedData.village.value;
 				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = true;
+				serviceData.show = true;
 				$('input:radio[name="mode"][value="overview"]').prop("checked", "checked");
 				//TODO:根据selectvillage得到概览内容，填入infoPopLayer中的表格内
 				document.getElementById("infoPopLayer").innerHTML=
