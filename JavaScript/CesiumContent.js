@@ -531,10 +531,15 @@
 					}
 				}
 				information += "</table>";
-				document.getElementById("infoPopLayer").innerHTML = 
-					"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('descPopLayer')\">x</a><br/>"
-					+ information;
 				popPicBox("infoPopLayer");
+				document.getElementById("infoPopLayer").innerHTML = 
+					"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
+					+ information;
+
+				popPicBox("picPopLayer");
+				document.getElementById("picPopLayer").innerHTML=
+				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('picPopLayer')\">x</a><br/>"
+				+ "<img src = '/Source/pic/" + selectedVillage + "/" + villageIndex[selectedVillage].项目图片 + "'/>";
 
 				handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 				handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
