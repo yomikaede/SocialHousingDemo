@@ -25,12 +25,12 @@
 	//scene.screenSpaceCameraController.enableLook = false;
 	viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 	
-	var layers = viewer.scene.imageryLayers;
+	/* var layers = viewer.scene.imageryLayers;
 	var darkblue = layers.addImageryProvider(new Cesium.SingleTileImageryProvider({
 		url : '/source/pic/darkblue.jpg',
-	}));
+	})); */
 	
-	darkblue.alpha = 0.9;
+	//darkblue.alpha = 0.9;
 	//darkblue.brightness = 2.0;
 	
 	var selectedEntity = undefined;
