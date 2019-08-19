@@ -223,7 +223,6 @@
 				{
 					if (Cesium.defined(entity.kml.extendedData))
 					{
-						entity.polygon.material = Cesium.Color.WHITE;
 						var buildingInfo = entity.kml.extendedData;
 						if (floorData[buildingInfo.floor.value + '层'] == undefined)
 						{
@@ -231,7 +230,7 @@
 						}
 						floorData[buildingInfo.floor.value + '层'] = floorData[buildingInfo.floor.value + '层'] + 1;
 						entity.polygon.extrudedHeight = buildingInfo.floor.value * 3;
-						entity.polygon.material = Cesium.Color.YELLOW;
+						entity.polygon.material = Cesium.Color.TAN;
 						entity.polygon.outline = false;
 						entity.description = '<table class="cesium-infoBox-defaultTable"><tbody>' +
 											  '<tr><th>层数</th><td>' + buildingInfo.floor.value + '</td></tr>' +
@@ -375,10 +374,11 @@
 	            var cartographic=Cesium.Cartographic.fromCartesian(polyCenter);
 				var lat = Cesium.Math.toDegrees(cartographic.latitude);
 				var lng = Cesium.Math.toDegrees(cartographic.longitude);
-	            viewer.scene.camera.setView({
+	            var destinationView = {
 	            	destination : new Cesium.Cartesian3.fromDegrees(lng, lat, 600),
 	            	orientation : initialOrientation
-	            });
+	            };
+				viewer.scene.camera.flyTo(destinationView);
 				selectedVillage = selectedEntity.kml.extendedData.village.value;
 				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show=false;
 				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show=false;
@@ -425,7 +425,7 @@
 	    var startFlag = isBuilding(startFeature);
 	    var endFlag = isBuilding(endFeature);
 	    if(startFlag && endFlag && (startFeature!=endFeature)){
-	    	startFeature.id.polygon.material = Cesium.Color.WHITE;
+	    	startFeature.id.polygon.material = Cesium.Color.TAN;
 	    	endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
@@ -439,7 +439,7 @@
 	    }
 		if(startFlag && (!endFlag))
 		{
-			startFeature.id.polygon.material = Cesium.Color.WHITE;
+			startFeature.id.polygon.material = Cesium.Color.TAN;
 			closePicBox("hoverPopLayer");
 		}
 		if((!startFlag) && endFlag)
