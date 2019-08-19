@@ -112,12 +112,10 @@
 	{
 		command = "SELECT * FROM " + publicService[list];
 		getInfo(command).then(function(value){
-			console.log(value);
 			for(var i in value)
 			{
 				var obj = value[i];
 				var description = "<table>";
-				console.log(obj);
 				for(var j in obj)
 				{
 					description += "<tr>";
@@ -144,11 +142,10 @@
 					},
 					description: description
 				}));
-				console.log(description);
 			}
 		});
 	}
-	viewer.entities.add(serviceCollection);
+	
 
 	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 	var handlerLMove = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
