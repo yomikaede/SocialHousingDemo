@@ -101,7 +101,6 @@
 	{
 		readBoundaryLineKML('/Source/KMLFiles/' + villages[i] + '_bl.kml');
 		readBuildingKML('/Source/KMLFiles/' + villages[i] + '_bldg.kml');
-		readNeighborKML('/Source/KMLFiles/' + villages[i] + '_nbhd.kml');
 	}
 	
 	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
