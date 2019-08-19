@@ -327,41 +327,66 @@
 		if(mode == "overview")
 		{
 			closePicBox("hoverPopLayer");
-			buildingData.show = true;
+			entryData.show = false;
+			trafficData.show = false;
+			serviceData.show = false;
+
 			//根据selectvillage得到概览内容，填入infoPopLayer中的表格内
-			document.getElementById("infoPopLayer").innerHTML=
-				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
-				+ "<table>" 
-				+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
-				+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
-				+ "</table>";
-			
+			var information = "<table>";
+			var village = villageIndex[selectedVillage];
+			for(var i in village)
+			{
+				if((i!="项目图片")&&(i!="项目效果图")&&(i!="交通信息文字简介")&&(i!="经度")&&(i!="纬度"))
+				{
+					information += ("<tr><th>" + i + "</th><th>" + village[i] + "</th></tr>"); 
+				}
+			}
+			information += "</table>";
 			popPicBox("infoPopLayer");
-			document.getElementById("descPopLayer").innerHTML=
-				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('descPopLayer')\">x</a><br/>"
-				+ "description here";
-			//TODO:小区描述
-			popPicBox("descPopLayer");
+			document.getElementById("infoPopLayer").innerHTML = 
+				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
+				+ information;
+
+			popPicBox("picPopLayer");
+			document.getElementById("picPopLayer").innerHTML=
+			"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('picPopLayer')\">x</a><br/>"
+			+ "<img src = '/Source/pic/" + selectedVillage + "/" + villageIndex[selectedVillage].项目图片 + "'/>";
 		}
 		else if(mode == "building")
 		{
 			closePicBox("hoverPopLayer");
-			buildingData.show = true;
+			closePicBox("infoPopLayer");
+			closePicBox("picPopLayer");
+			entryData.show = false;
+			trafficData.show = false;
+			serviceData.show = false;
 		}
 		else if(mode == "traffic")
 		{
 			closePicBox("hoverPopLayer");
-			buildingData.show = false;
+			closePicBox("infoPopLayer");
+			closePicBox("picPopLayer");
+			entryData.show = false;
+			trafficData.show = true;
+			serviceData.show = false;
 		}
 		else if(mode == "service")
 		{
 			closePicBox("hoverPopLayer");
-			buildingData.show = false;
+			closePicBox("infoPopLayer");
+			closePicBox("picPopLayer");
+			entryData.show = false;
+			trafficData.show = false;
+			serviceData.show = true;
 		}
 		else if(mode == "plan")
 		{
 			closePicBox("hoverPopLayer");
-			buildingData.show = true;
+			closePicBox("infoPopLayer");
+			closePicBox("picPopLayer");
+			entryData.show = false;
+			trafficData.show = false;
+			serviceData.show = false;
 		}
 	});
 
@@ -516,8 +541,9 @@
 	            };
 				viewer.scene.camera.flyTo(destinationView);
 				selectedVillage = selectedEntity.kml.extendedData.village.value;
-				serviceData.show = true;
-				trafficData.show = true;
+				entryData.show = false;
+				trafficData.show = false;
+				serviceData.show = false;
 				buildingData.show = true;
 				$('input:radio[name="mode"][value="overview"]').prop("checked", "checked");
 				//TODO:根据selectvillage得到概览内容，填入infoPopLayer中的表格内
