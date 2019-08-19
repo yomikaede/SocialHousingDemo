@@ -112,12 +112,10 @@
 	{
 		command = "SELECT * FROM " + publicService[list];
 		getInfo(command).then(function(value){
-			console.log(value);
 			for(var i in value)
 			{
 				var obj = value[i];
 				var description = "<table>";
-				console.log(obj);
 				for(var j in obj)
 				{
 					description += "<tr>";
@@ -125,7 +123,7 @@
 				    description += "</tr>";
 				}
 				description += "</table>";
-				serviceCollection.add(new Cesium.Entity({
+				var entity = new Cesium.Entity({
 					position: Cesium.Cartesian3.fromDegrees(obj.经度, obj.纬度),	
 				    point: {
 				        pixelSize : 3,
@@ -143,12 +141,14 @@
 				        pixelOffset:new Cesium.Cartesian2(0,-5)            //偏移
 					},
 					description: description
-				}));
-				console.log(description);
+				});
+				serviceCollection.add(entity);
+				viewer.entities.add(entity);
+				console.log(serviceCollection.contains(entity));
 			}
 		});
 	}
-	viewer.entities.add(serviceCollection);
+	
 
 	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 	var handlerLMove = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
