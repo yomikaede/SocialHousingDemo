@@ -4,10 +4,10 @@
 	//Cesium Ion Token
 	//Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyMTRjOTU4NC05YjgzLTRkY2ItODc5Ny1iMmNjYTY1NGM4NTYiLCJpZCI6MTMzNTksInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjMxNjA2NDd9.8QNebQOHWVNfaHACDU8dgldjiaDQnrin6OkSht96Tx8';
 	
-	var generalInfo = [""]
-	var publicService = ["公用类","行政管理设施","户外活动场所","教育设施","金融邮电",
+	var entryList = ["出入口"]
+	var serviceList = ["公用类","行政管理设施","户外活动场所","教育设施","金融邮电",
 						"垃圾处理","商业服务","文化活动中心","医疗卫生设施","自发性服务设施"];
-	var trafficService = ["出入口","地铁","公交站","小区停车场","周边道路信息"];
+	var trafficList = ["地铁","公交站","小区停车场","周边道路信息"];
 	
 	//初始化Cesium
 	var viewer = new Cesium.Viewer('cesiumContainer',{
@@ -41,7 +41,6 @@
 	var selectedEntity = undefined;
 	var originEntity = undefined;
 	var selectedVillage="";
-	var dataSourceIndex = [];
 	//初始化视角 坐标
 	//西安市区坐标
 	var initialPosition = new Cesium.Cartesian3.fromDegrees(108.962896,34.270019, 55000.000000);
@@ -68,12 +67,11 @@
 		handlerLClick.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 		closePicBox("infoPopLayer");
 		closePicBox("picPopLayer");
+		serviceData.show = false;
+		trafficData.show = false;
 		viewer.selectedEntity = undefined;
 		var menuLayer = document.getElementById("menuLayer");
 		menuLayer.style.display = "none";
-		if(selectedVillage!=""){
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = false;
-		}
 		viewer.scene.camera.flyTo(homeCameraView);
 	});
 
@@ -108,46 +106,50 @@
 	var serviceData = new Cesium.CustomDataSource();
 
 	var command = "";
-	for(var list in publicService)
-	{
-		command = "SELECT * FROM " + publicService[list];
-		getInfo(command).then(function(value){
-			for(var i in value)
-			{
-				var obj = value[i];
-				var description = "<table>";
-				for(var j in obj)
+	
+	
+	//读取信息
+	function readListData(toReadList, toReadData)
+	{		
+		for(var list in toReadList)
+		{
+			command = "SELECT * FROM " + toReadList[list];
+			getInfo(command).then(function(value){
+				for(var i in value)
 				{
-					description += "<tr>";
-				    description += ("<td>" + j + "</td><td>" + obj[j] + "<td>");
-				    description += "</tr>";
+					var obj = value[i];
+					var description = [1, 2, 3, 4];
+					var entity = new Cesium.Entity({
+						position: Cesium.Cartesian3.fromDegrees(obj.经度 - 0.005, obj.纬度 + 0.0014),	
+						point: {
+							pixelSize : 3,
+							color : Cesium.Color.RED,
+							outlineColor : Cesium.Color.WHITE,
+							outlineWidth : 1
+						},
+						label: {
+							text : obj.名称,
+							showBackground : true,
+							scale : 0.6,
+							horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
+							verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
+							//distanceDisplayCondition : new Cesium.DistanceDisplayCondition(10.0, 8000.0),
+					        pixelOffset:new Cesium.Cartesian2(0,-5)            //偏移
+						},
+						description: description
+					});
+					toReadData.entities.add(entity);
 				}
-				description += "</table>";
-				var entity = new Cesium.Entity({
-					position: Cesium.Cartesian3.fromDegrees(obj.经度-0.005, obj.纬度+0.0014),	
-				    point: {
-				        pixelSize : 3,
-				        color : Cesium.Color.RED,
-				        outlineColor : Cesium.Color.WHITE,
-				        outlineWidth : 1
-				    },
-					label: {
-						text : obj.名称,
-						showBackground : true,
-						scale : 0.6,
-						horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
-						verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
-						//distanceDisplayCondition : new Cesium.DistanceDisplayCondition(10.0, 8000.0),
-				        pixelOffset:new Cesium.Cartesian2(0,-5)            //偏移
-					},
-					description: description
-				});
-				serviceData.entities.add(entity);
-			}
-		});
+			});
+		}
+		viewer.dataSources.add(toReadData);
+		toReadData.show = false;
 	}
-	viewer.dataSources.add(serviceData);
-	serviceData.show = false;
+	
+	readListData(entryList, entryData);
+	readListData(serviceList, serviceData);
+	readListData(trafficList, trafficData);
+	
 	
 
 	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
@@ -216,7 +218,7 @@
 		})
 	}
 	
-	//读取小区周边kml文件	
+	/* //读取小区周边kml文件	
 	function readNeighborKML(url)
 	{		
 		var neighborPromise = Cesium.KmlDataSource.load(url, kmlOptions);
@@ -256,7 +258,7 @@
 				}
 			}
 		})
-	}
+	} */
 
 	//读取建筑kml文件
 	function readBuildingKML(url)
@@ -265,7 +267,7 @@
 		var floorData = [];
 		buildingPromise.then(function(dataSource) {
 			viewer.dataSources.add(dataSource);
-			dataSourceIndex[dataSource.name+'_bldg'] = viewer.dataSources.indexOf(dataSource);
+			buildingData = dataSource;
 			dataSource.show = false;
 			var buildingEntities = dataSource.entities.values;
 			for(var i = 0; i < buildingEntities.length; i++)
@@ -276,16 +278,30 @@
 					if (Cesium.defined(entity.kml.extendedData))
 					{
 						var buildingInfo = entity.kml.extendedData;
-						if (floorData[buildingInfo.floor.value + '层'] == undefined)
-						{
-							floorData[buildingInfo.floor.value + '层'] = 0;
-						}
-						floorData[buildingInfo.floor.value + '层'] = floorData[buildingInfo.floor.value + '层'] + 1;
 						entity.polygon.extrudedHeight = buildingInfo.floor.value * 3;
 						entity.polygon.material = Cesium.Color.TAN;
 						entity.polygon.outline = false;
 						entity.description = '';
-						entity.name = buildingInfo.buildingName.value;					
+						entity.name = buildingInfo.buildingName.value;			
+						command = "SELECT * FROM 小区单元 WHERE 单元号 = 1#";						
+ 						var buildingSql = NonAsyncReadData(command);
+						if (buildingSql != "")
+						{
+							var obj = buildingSql[0];
+							var description = "<table>";
+							for(var j in obj)
+							{
+								description += "<tr>";
+								description += ("<td>" + j + "</td><td>" + obj[j] + "<td>");
+								description += "</tr>";
+							}
+							description += "</table>";
+							entity.description = description;
+						}
+						else
+						{
+							entity.description = undefined;
+						}
 						//TODO:根据高度设置颜色
 					}
 				}
@@ -294,6 +310,9 @@
 			
 		})
 	}
+		
+
+
 
 	//选择框
 	$('input[type="radio"][name="mode"]').change(function modechange(){
@@ -301,7 +320,7 @@
 		if(mode == "overview")
 		{
 			closePicBox("hoverPopLayer");
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = true;
+			buildingData.show = true;
 			//根据selectvillage得到概览内容，填入infoPopLayer中的表格内
 			document.getElementById("infoPopLayer").innerHTML=
 				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
@@ -320,22 +339,22 @@
 		else if(mode == "building")
 		{
 			closePicBox("hoverPopLayer");
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = true;
+			buildingData.show = true;
 		}
 		else if(mode == "traffic")
 		{
 			closePicBox("hoverPopLayer");
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = false;
+			buildingData.show = false;
 		}
 		else if(mode == "service")
 		{
 			closePicBox("hoverPopLayer");
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = false;
+			buildingData.show = false;
 		}
 		else if(mode == "plan")
 		{
 			closePicBox("hoverPopLayer");
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = true;
+			buildingData.show = true;
 		}
 	});
 
@@ -356,6 +375,26 @@
 			});	
 		})   	
 	};
+	
+	//同步读取
+	function NonAsyncReadData(command)
+	{
+		var xmlhttp;   
+		if (window.XMLHttpRequest)
+		{
+			//  IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+			xmlhttp=new XMLHttpRequest();
+		}
+		else
+		{
+			// IE6, IE5 浏览器执行代码
+			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+
+		xmlhttp.open("GET", "/get?command=" + command, false);
+		xmlhttp.send();
+		return JSON.parse(xmlhttp.responseText);
+	}
 	
 	function JsonToChart(json, elementId){
     	var tableHtml = "<table>";
@@ -451,8 +490,9 @@
 	            };
 				viewer.scene.camera.flyTo(destinationView);
 				selectedVillage = selectedEntity.kml.extendedData.village.value;
-				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = true;
 				serviceData.show = true;
+				trafficData.show = true;
+				buildingData.show = true;
 				$('input:radio[name="mode"][value="overview"]').prop("checked", "checked");
 				//TODO:根据selectvillage得到概览内容，填入infoPopLayer中的表格内
 				document.getElementById("infoPopLayer").innerHTML=
@@ -500,11 +540,8 @@
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
-	    	hover.innerHTML=
-	    	"<table>" 
-			+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
-			+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
-			+ "</table>";
+	    	hover.innerHTML=endFeature.id.description;
+			console.log(endFeature.id);
 	    	popPicBox("hoverPopLayer");
 	    }
 		if(startFlag && (!endFlag))
@@ -518,11 +555,7 @@
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
-	    	hover.innerHTML=
-	    	"<table>" 
-			+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
-			+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
-			+ "</table>";
+	    	hover.innerHTML=endFeature.id.description;
 	    	popPicBox("hoverPopLayer");
 	    }
 	}

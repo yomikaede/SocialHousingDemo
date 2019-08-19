@@ -68,7 +68,7 @@
       <Snippet></Snippet>
       <styleUrl>#PolyStyle00</styleUrl>
       <ExtendedData>
-        <Data name="id"><value>5</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>6号楼</value></Data>
+        <Data name="id"><value>5</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>6#</value></Data>
       </ExtendedData>
       <MultiGeometry>
         <Polygon>
@@ -82,7 +82,7 @@
       <Snippet></Snippet>
       <styleUrl>#PolyStyle00</styleUrl>
       <ExtendedData>
-        <Data name="id"><value>6</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>5号楼</value></Data>
+        <Data name="id"><value>6</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>5#</value></Data>
       </ExtendedData>
       <MultiGeometry>
         <Polygon>
@@ -96,7 +96,7 @@
       <Snippet></Snippet>
       <styleUrl>#PolyStyle00</styleUrl>
       <ExtendedData>
-        <Data name="id"><value>9</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>4号楼</value></Data>
+        <Data name="id"><value>9</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>4#</value></Data>
       </ExtendedData>
       <MultiGeometry>
         <Polygon>
@@ -138,7 +138,7 @@
       <Snippet></Snippet>
       <styleUrl>#PolyStyle00</styleUrl>
       <ExtendedData>
-        <Data name="id"><value>12</value></Data><Data name="floor"><value>32</value></Data><Data name="buildingName"><value>7号楼</value></Data>
+        <Data name="id"><value>12</value></Data><Data name="floor"><value>32</value></Data><Data name="buildingName"><value>7#</value></Data>
       </ExtendedData>
       <MultiGeometry>
         <Polygon>
@@ -428,7 +428,7 @@
 ]]></description>
       <styleUrl>#PolyStyle00</styleUrl>
       <ExtendedData>
-        <Data name="id"><value>17</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>3号楼</value></Data>
+        <Data name="id"><value>17</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>3#</value></Data>
       </ExtendedData>
       <MultiGeometry>
         <Polygon>
@@ -566,7 +566,7 @@
 ]]></description>
       <styleUrl>#PolyStyle00</styleUrl>
       <ExtendedData>
-        <Data name="id"><value>19</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>2号楼</value></Data>
+        <Data name="id"><value>19</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>2#</value></Data>
       </ExtendedData>
       <MultiGeometry>
         <Polygon>
@@ -635,7 +635,7 @@
 ]]></description>
       <styleUrl>#PolyStyle00</styleUrl>
       <ExtendedData>
-        <Data name="id"><value>20</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>8号楼</value></Data>
+        <Data name="id"><value>20</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>8#</value></Data>
       </ExtendedData>
       <MultiGeometry>
         <Polygon>
@@ -842,7 +842,7 @@
 ]]></description>
       <styleUrl>#PolyStyle00</styleUrl>
       <ExtendedData>
-        <Data name="id"><value>23</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>1号楼</value></Data>
+        <Data name="id"><value>23</value></Data><Data name="floor"><value>33</value></Data><Data name="buildingName"><value>1#</value></Data>
       </ExtendedData>
       <MultiGeometry>
         <Polygon>
