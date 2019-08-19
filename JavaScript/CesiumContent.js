@@ -123,7 +123,7 @@
 				    description += "</tr>";
 				}
 				description += "</table>";
-				serviceCollection.add(new Cesium.Entity({
+				var entity = new Cesium.Entity({
 					position: Cesium.Cartesian3.fromDegrees(obj.经度, obj.纬度),	
 				    point: {
 				        pixelSize : 3,
@@ -141,7 +141,10 @@
 				        pixelOffset:new Cesium.Cartesian2(0,-5)            //偏移
 					},
 					description: description
-				}));
+				});
+				serviceCollection.add(entity);
+				viewer.entities.add(entity);
+				console.log(serviceCollection.contains(entity));
 			}
 		});
 	}
