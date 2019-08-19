@@ -104,13 +104,11 @@
     app.get('/get', function(req, res, next) {
         var params = url.parse(req.url, true).query;
         var sql = params.command;
-        console.log(sql);
         connection.query(sql, function(error, results){
             if(error) 
             {
-                throw error;    
+              
             }
-			console.log(results);
             res.send(results);
         })
     })
