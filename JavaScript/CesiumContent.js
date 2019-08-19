@@ -110,16 +110,18 @@
 	var command = "";
 	for(var list in publicService)
 	{
-		command = "SELECT * FROM " + list;
-		console.log(command);
+		command = "SELECT * FROM " + publicService[list];
 		getInfo(command).then(function(value){
-			for(var obj in value)
+			console.log(value);
+			for(var i in value)
 			{
+				var obj = value[i];
 				var description = "<table>";
-				for(var item in obj)
+				console.log(obj);
+				for(var j in obj)
 				{
 					description += "<tr>";
-				    description += ("<td>" + obj + "</td><td>" + json[obj] + "<td>");
+				    description += ("<td>" + j + "</td><td>" + obj[j] + "<td>");
 				    description += "</tr>";
 				}
 				description += "</table>";
@@ -142,10 +144,11 @@
 					},
 					description: description
 				}));
+				console.log(description);
 			}
-			console.log(serviceCollection);
 		});
 	}
+	viewer.entities.add(serviceCollection);
 
 	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 	var handlerLMove = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
