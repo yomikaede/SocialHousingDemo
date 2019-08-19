@@ -30,7 +30,6 @@
 	//scene.screenSpaceCameraController.enableLook = false;
 	viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 	
-	var selectedEntity = undefined;
 	var originEntity = undefined;
 	var selectedVillage="";
 	var villages = [];
@@ -64,13 +63,12 @@
 
 		closePicBox("infoPopLayer");
 		closePicBox("picPopLayer");
-		serviceData.show = false;
-		trafficData.show = false;
-		viewer.selectedEntity = undefined;
 		closePicBox("descPopLayer");
 		closePicBox("menuLayer");
+		serviceData.show = false;
+		trafficData.show = false;
 		buildingData.show = false;
-		viewer.selectedEntity = undefined;
+		entryData.show = false;
 		viewer.scene.camera.flyTo(homeCameraView);
 	});
 
@@ -319,7 +317,7 @@
 		if(mode == "overview")
 		{
 			closePicBox("hoverPopLayer");
-			entryData.show = false;
+			entryData.show = true;
 			trafficData.show = false;
 			serviceData.show = false;
 
@@ -503,7 +501,7 @@
 	function onLeftClick(movement) {
 		var pickedFeature = viewer.scene.pick(movement.position);
     	if (Cesium.defined(pickedFeature)) {
-		    selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
+		    var selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
 			if (selectedEntity instanceof Cesium.Entity) {
 				document.getElementById("cesiumContainer").style.cursor = "default";
 				selectedVillage = selectedEntity.kml.extendedData.village.value;
@@ -523,7 +521,7 @@
 	function onDoubleClick(movement) {
     	var pickedFeature = viewer.scene.pick(movement.position);
     	if (Cesium.defined(pickedFeature)) {
-		    selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
+		    var selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
 			if (selectedEntity instanceof Cesium.Entity) {
 				document.getElementById("cesiumContainer").style.cursor = "default";
 				closePicBox("descPopLayer");
@@ -537,7 +535,7 @@
 	            };
 				viewer.scene.camera.flyTo(destinationView);
 				selectedVillage = selectedEntity.kml.extendedData.village.value;
-				entryData.show = false;
+				entryData.show = true;
 				trafficData.show = false;
 				serviceData.show = false;
 				buildingData.show = true;
@@ -689,7 +687,7 @@
 	function onLeftClickBldg(movement) {
     	var pickedFeature = viewer.scene.pick(movement.position);
     	if (Cesium.defined(pickedFeature)) {
-		    selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
+		    var selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
 			if (selectedEntity instanceof Cesium.Entity) {
 				document.getElementById("picPopLayer").innerHTML=
 				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('picPopLayer')\">x</a><br/>"
