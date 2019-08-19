@@ -69,7 +69,7 @@
 		viewer.selectedEntity = undefined;
 		closePicBox("descPopLayer");
 		closePicBox("menuLayer");
-		serviceData.show = false;
+		buildingData.show = false;
 		viewer.selectedEntity = undefined;
 		viewer.scene.camera.flyTo(homeCameraView);
 	});
@@ -276,6 +276,24 @@
 			viewer.dataSources.add(dataSource);
 			buildingData = dataSource;
 			dataSource.show = false;
+			
+			command = "SELECT * FROM 小区单元";						
+			var buildingSql = NonAsyncReadData(command);
+			var sqlData = [];
+			for (var i in buildingSql)
+			{
+				var obj = buildingSql[i];
+				var description = "<table>";
+				for(var j in obj)
+				{
+					description += "<tr>";
+					description += ("<td>" + j + "</td><td>" + obj[j] + "<td>");
+					description += "</tr>";
+				}
+				description += "</table>";
+				sqlData[obj.单元号] = description;
+			}
+			
 			var buildingEntities = dataSource.entities.values;
 			for(var i = 0; i < buildingEntities.length; i++)
 			{
@@ -290,25 +308,7 @@
 						entity.polygon.outline = false;
 						entity.description = '';
 						entity.name = buildingInfo.buildingName.value;			
-						command = "SELECT * FROM 小区单元 WHERE 单元号 = 1#";						
- 						var buildingSql = NonAsyncReadData(command);
-						if (buildingSql != "")
-						{
-							var obj = buildingSql[0];
-							var description = "<table>";
-							for(var j in obj)
-							{
-								description += "<tr>";
-								description += ("<td>" + j + "</td><td>" + obj[j] + "<td>");
-								description += "</tr>";
-							}
-							description += "</table>";
-							entity.description = description;
-						}
-						else
-						{
-							entity.description = undefined;
-						}
+						entity.description = sqlData[entity.name];
 						//TODO:根据高度设置颜色
 					}
 				}
@@ -550,29 +550,35 @@
 	}
 
 	//TODO:识别entity类型
-	function isBuilding(feature){
+	function isIncluded(feature, dataSource){
 		if (Cesium.defined(feature)) {
 			var entity = Cesium.defaultValue(feature.id, feature.primitive.id);
-			if ((entity instanceof Cesium.Entity)&&(Cesium.defined(entity.polygon.extrudedHeight)))
+			if (dataSource.entities.contains(entity))
+			{
 				return true;
+			}
 		}
 		return false;
 	}
 
+
 	function onMouseMoveBldg(movement) {
 	    var startFeature = viewer.scene.pick(movement.startPosition);
 	    var endFeature = viewer.scene.pick(movement.endPosition);
-	    var startFlag = isBuilding(startFeature);
-	    var endFlag = isBuilding(endFeature);
+	    var startFlag = isIncluded(startFeature, buildingData);
+	    var endFlag = isIncluded(endFeature, buildingData);
+		
 	    if(startFlag && endFlag && (startFeature!=endFeature)){
 	    	startFeature.id.polygon.material = Cesium.Color.TAN;
 	    	endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
-	    	hover.innerHTML=endFeature.id.description;
-			console.log(endFeature.id);
-	    	popPicBox("hoverPopLayer");
+			if (Cesium.defined(endFeature.id.description))
+			{
+				hover.innerHTML = endFeature.id.description;
+				popPicBox("hoverPopLayer");
+			}
 	    }
 		if(startFlag && (!endFlag))
 		{
@@ -585,8 +591,11 @@
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
-	    	hover.innerHTML=endFeature.id.description;
-	    	popPicBox("hoverPopLayer");
+			if (Cesium.defined(endFeature.id.description))
+			{
+				hover.innerHTML = endFeature.id.description;
+				popPicBox("hoverPopLayer");
+			}
 	    }
 	}
 
