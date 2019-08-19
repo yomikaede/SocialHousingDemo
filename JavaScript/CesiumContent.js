@@ -463,7 +463,7 @@
 		    selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
 			if (selectedEntity instanceof Cesium.Entity) {
 				document.getElementById("cesiumContainer").style.cursor = "default";
-				closePicBox("hoverPopLayer");
+				closePicBox("descPopLayer");
 	            var polyCenter = selectedEntity.position.getValue();
 	            var cartographic=Cesium.Cartographic.fromCartesian(polyCenter);
 				var lat = Cesium.Math.toDegrees(cartographic.latitude);
@@ -488,15 +488,17 @@
 					}
 				}
 				information += "</table>";
-				document.getElementById("infoPopLayer").innerHTML = information;
+				document.getElementById("infoPopLayer").innerHTML = 
+					"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('descPopLayer')\">x</a><br/>"
+					+ information;
 				popPicBox("infoPopLayer");
 
 				handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 				handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
 				handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
-				selectedEntity.polygon.material = new Cesium.Color(1,1,1,0);
 				handler.setInputAction(onLeftClickBldg, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 				handler.setInputAction(onMouseMoveBldg, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+				selectedEntity.polygon.material = new Cesium.Color(1,1,1,0);
 				
 				var menuLayer = document.getElementById("menuLayer");
 				menuLayer.style.display = "block";
