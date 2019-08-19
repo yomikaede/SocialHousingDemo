@@ -30,17 +30,12 @@
 	//scene.screenSpaceCameraController.enableLook = false;
 	viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 	
-	/* var layers = viewer.scene.imageryLayers;
-	var darkblue = layers.addImageryProvider(new Cesium.SingleTileImageryProvider({
-		url : '/source/pic/darkblue.jpg',
-	})); */
-	
-	//darkblue.alpha = 0.9;
-	//darkblue.brightness = 2.0;
-	
 	var selectedEntity = undefined;
 	var originEntity = undefined;
 	var selectedVillage="";
+	var villages = [];
+	var villageIndex = [];
+	var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 	//初始化视角 坐标
 	//西安市区坐标
 	var initialPosition = new Cesium.Cartesian3.fromDegrees(108.962896,34.270019, 55000.000000);
@@ -61,17 +56,21 @@
 	viewer.scene.camera.setView(homeCameraView);
 	viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
 		e.cancel = true;
-		handlerLMove.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-		handlerLMove.setInputAction(onMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-		handlerLClick.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
-		handlerLClick.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+		handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+		handler.setInputAction(onMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+		handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+		handler.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+		handler.setInputAction(onDoubleClick, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
 		closePicBox("infoPopLayer");
 		closePicBox("picPopLayer");
 		serviceData.show = false;
 		trafficData.show = false;
 		viewer.selectedEntity = undefined;
-		var menuLayer = document.getElementById("menuLayer");
-		menuLayer.style.display = "none";
+		closePicBox("descPopLayer");
+		closePicBox("menuLayer");
+		serviceData.show = false;
+		viewer.selectedEntity = undefined;
 		viewer.scene.camera.flyTo(homeCameraView);
 	});
 
@@ -90,8 +89,17 @@
 	};
 
 	//获取小区信息
-	
-	var villages = ['XM61010000000088'];
+	villages.push("XM61010000000088");
+
+	var command = "";
+	command = "SELECT * FROM 小区总表";
+	getInfo(command).then(function(value){
+		for(var i in value)
+		{
+			villageIndex[value[i].项目编号] = value[i];
+		}
+		console.log(villageIndex);
+	})
 	
 	
 	for (var i = 0; i < villages.length; i++)
@@ -104,6 +112,7 @@
 	var trafficData = new Cesium.CustomDataSource();
 	var buildingData = new Cesium.CustomDataSource();
 	var serviceData = new Cesium.CustomDataSource();
+
 
 	var command = "";
 	
@@ -152,11 +161,9 @@
 	
 	
 
-	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
-	var handlerLMove = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
-
-	handlerLMove.setInputAction(onMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-	handlerLClick.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+	handler.setInputAction(onMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+	handler.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+	handler.setInputAction(onDoubleClick, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
 	//读取小区轮廓kml文件
 	function readBoundaryLineKML(url)
@@ -471,9 +478,28 @@
 		}
 	}
 	
-	
-	//左键单击选中进入小区
+	//左键单击显示小区信息
 	function onLeftClick(movement) {
+		var pickedFeature = viewer.scene.pick(movement.position);
+    	if (Cesium.defined(pickedFeature)) {
+		    selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
+			if (selectedEntity instanceof Cesium.Entity) {
+				document.getElementById("cesiumContainer").style.cursor = "default";
+				selectedVillage = selectedEntity.kml.extendedData.village.value;
+				popPicBox("descPopLayer");
+				document.getElementById("descPopLayer").innerHTML=
+					"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('descPopLayer')\">x</a><br/><p>"
+					+ villageIndex[selectedVillage].交通信息文字简介 + "</p>";
+				popPicBox("picPopLayer");
+				document.getElementById("picPopLayer").innerHTML=
+				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('picPopLayer')\">x</a><br/>"
+				+ "<img src = '/Source/pic/" + selectedVillage + "/" + villageIndex[selectedVillage].项目效果图 + "'/>";
+			}
+		}
+	}
+
+	//左键双击选中进入小区
+	function onDoubleClick(movement) {
     	var pickedFeature = viewer.scene.pick(movement.position);
     	if (Cesium.defined(pickedFeature)) {
 		    selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
@@ -495,23 +521,25 @@
 				buildingData.show = true;
 				$('input:radio[name="mode"][value="overview"]').prop("checked", "checked");
 				//TODO:根据selectvillage得到概览内容，填入infoPopLayer中的表格内
-				document.getElementById("infoPopLayer").innerHTML=
-					"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
-					+ "<table>" 
-					+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
-					+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
-					+ "</table>";
+				var information = "<table>";
+				var village = villageIndex[selectedVillage];
+				for(var i in village)
+				{
+					if((i!="项目图片")&&(i!="项目效果图")&&(i!="交通信息文字简介")&&(i!="经度")&&(i!="纬度"))
+					{
+						information += ("<tr><th>" + i + "</th><th>" + village[i] + "</th></tr>"); 
+					}
+				}
+				information += "</table>";
+				document.getElementById("infoPopLayer").innerHTML = information;
 				popPicBox("infoPopLayer");
-				document.getElementById("descPopLayer").innerHTML=
-					"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('descPopLayer')\">x</a><br/>"
-					+ "description here";
-				popPicBox("descPopLayer");
 
-				handlerLMove.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-				handlerLClick.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+				handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+				handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+				handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 				selectedEntity.polygon.material = new Cesium.Color(1,1,1,0);
-				handlerLClick.setInputAction(onLeftClickBldg, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-				handlerLClick.setInputAction(onMouseMoveBldg, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+				handler.setInputAction(onLeftClickBldg, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+				handler.setInputAction(onMouseMoveBldg, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 				
 				var menuLayer = document.getElementById("menuLayer");
 				menuLayer.style.display = "block";
