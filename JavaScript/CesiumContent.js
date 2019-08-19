@@ -35,6 +35,7 @@
 	var selectedVillage="";
 	var villages = [];
 	var villageIndex = [];
+	var command = "";
 	var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 	//初始化视角 坐标
 	//西安市区坐标
@@ -89,17 +90,14 @@
 	};
 
 	//获取小区信息
-	villages.push("XM61010000000088");
-
-	var command = "";
 	command = "SELECT * FROM 小区总表";
-	getInfo(command).then(function(value){
-		for(var i in value)
-		{
-			villageIndex[value[i].项目编号] = value[i];
-		}
-		console.log(villageIndex);
-	})
+	var villageInfo = NonAsyncReadData(command);
+	
+	for(var i in villageInfo)
+	{
+		villages.push(villageInfo[i].项目编号);
+		villageIndex[villageInfo[i].项目编号] = villageInfo[i];
+	}
 	
 	
 	for (var i = 0; i < villages.length; i++)
@@ -423,7 +421,7 @@
 	function JsonToChart(json){
     	var tableHtml = "<table>";
 		for(var i in json){
-			if (i == "项目编号")
+			if ((i == "项目编号")||(i == "经度")||(i == "纬度"))
 			{
 				continue;
 			}

@@ -1,6 +1,6 @@
 #menuLayer {
 	display: none;
-	z-index: 11;
+	z-index: 9;
 	position: absolute;
 	text-align: center;
 	bottom: 20px;
@@ -10,7 +10,7 @@
 
 #menuLayer .menu {
 	display: block;
-	z-index: 11;
+	z-index: 9;
 	height: 100%;
 	width: 600px;
 	margin:0 auto;
