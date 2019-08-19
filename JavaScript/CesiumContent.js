@@ -73,7 +73,6 @@
 		menuLayer.style.display = "none";
 		if(selectedVillage!=""){
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = false;
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show = false;
 		}
 		viewer.scene.camera.flyTo(homeCameraView);
 	});
@@ -102,7 +101,52 @@
 		readBoundaryLineKML('/Source/KMLFiles/' + villages[i] + '_bl.kml');
 		readBuildingKML('/Source/KMLFiles/' + villages[i] + '_bldg.kml');
 	}
-	
+
+	var entryCollection = new Cesium.EntityCollection();
+	var trafficCollection = new Cesium.EntityCollection();
+	var buildingCollection = new Cesium.EntityCollection();
+	var serviceCollection = new Cesium.EntityCollection();
+
+	var command = "";
+	for(var list in publicService)
+	{
+		command = "SELECT * FROM " + list;
+		console.log(command);
+		getInfo(command).then(function(value){
+			for(var obj in value)
+			{
+				var description = "<table>";
+				for(var item in obj)
+				{
+					description += "<tr>";
+				    description += ("<td>" + obj + "</td><td>" + json[obj] + "<td>");
+				    description += "</tr>";
+				}
+				description += "</table>";
+				serviceCollection.add(new Cesium.Entity({
+					position: Cesium.Cartesian3.fromDegrees(obj.经度, obj.纬度),	
+				    point: {
+				        pixelSize : 3,
+				        color : Cesium.Color.RED,
+				        outlineColor : Cesium.Color.WHITE,
+				        outlineWidth : 1
+				    },
+					label: {
+						text : obj.名称,
+						showBackground : true,
+						scale : 0.6,
+						horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
+						verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
+						distanceDisplayCondition : new Cesium.DistanceDisplayCondition(10.0, 8000.0),
+				        pixelOffset:new Cesium.Cartesian2(0,-5)            //偏移
+					},
+					description: description
+				}));
+			}
+			console.log(serviceCollection);
+		});
+	}
+
 	var handlerLClick = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 	var handlerLMove = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 
@@ -237,9 +281,7 @@
 						entity.polygon.extrudedHeight = buildingInfo.floor.value * 3;
 						entity.polygon.material = Cesium.Color.TAN;
 						entity.polygon.outline = false;
-						entity.description = '<table class="cesium-infoBox-defaultTable"><tbody>' +
-											  '<tr><th>层数</th><td>' + buildingInfo.floor.value + '</td></tr>' +
-											  '</tbody></table>';
+						entity.description = '';
 						entity.name = buildingInfo.buildingName.value;					
 						//TODO:根据高度设置颜色
 					}
@@ -257,7 +299,6 @@
 		{
 			closePicBox("hoverPopLayer");
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = true;
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show = false;
 			//根据selectvillage得到概览内容，填入infoPopLayer中的表格内
 			document.getElementById("infoPopLayer").innerHTML=
 				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
@@ -277,25 +318,21 @@
 		{
 			closePicBox("hoverPopLayer");
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = true;
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show = false;
 		}
 		else if(mode == "traffic")
 		{
 			closePicBox("hoverPopLayer");
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = false;
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show = false;
 		}
 		else if(mode == "service")
 		{
 			closePicBox("hoverPopLayer");
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = false;
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show = true;
 		}
 		else if(mode == "plan")
 		{
 			closePicBox("hoverPopLayer");
 			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = true;
-			viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show = false;
 		}
 	});
 
@@ -412,7 +449,6 @@
 				viewer.scene.camera.flyTo(destinationView);
 				selectedVillage = selectedEntity.kml.extendedData.village.value;
 				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_bldg']).show = true;
-				viewer.dataSources.get(dataSourceIndex[selectedVillage+'_nbhd']).show = false;
 				$('input:radio[name="mode"][value="overview"]').prop("checked", "checked");
 				//TODO:根据selectvillage得到概览内容，填入infoPopLayer中的表格内
 				document.getElementById("infoPopLayer").innerHTML=
