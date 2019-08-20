@@ -129,6 +129,13 @@
 		toReadData.show = false;
 	}
 	
+	//读取规划信息
+	function readPlanList()
+	{
+		
+		
+	}
+	
 	readListData(entryList, entryData);
 	readListData(serviceList, serviceData);
 	readListData(trafficList, trafficData);
