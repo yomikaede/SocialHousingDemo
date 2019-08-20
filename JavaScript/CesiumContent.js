@@ -8,6 +8,19 @@
 	var serviceList = ["公用类","行政管理设施","户外活动场所","教育设施","金融邮电",
 						"垃圾处理","商业服务","文化活动中心","医疗卫生设施","自发性服务设施"];
 	var trafficList = ["地铁","公交站","小区停车场","周边道路信息"];
+	var planChartList = ["住宅建筑面积","商业建筑面积","幼儿园建筑面积","活动中心建筑面积","物业服务建筑面积",
+						"卫生站建筑面积","垃圾回收站","公厕","市场建筑面积"];
+	var ignoreList = ["项目编号","经度","纬度","项目图片","项目效果图","交通信息文字简介","道路断面形式"];
+	
+	var originEntity = undefined;
+	var selectedVillage = "";
+	var villages = [];
+	var villageIndex = [];
+	var command = "";
+	var entryData = new Cesium.CustomDataSource();
+	var trafficData = new Cesium.CustomDataSource();
+	var buildingData = new Cesium.CustomDataSource();
+	var serviceData = new Cesium.CustomDataSource();
 	
 	//初始化Cesium
 	var viewer = new Cesium.Viewer('cesiumContainer',{
@@ -23,24 +36,12 @@
 		animation: false
 	});
 	var scene = viewer.scene;
-	//scene.screenSpaceCameraController.enableRotate = false;
-	//scene.screenSpaceCameraController.enableTranslate = false;
 	scene.screenSpaceCameraController.enableZoom = false;
-	//scene.screenSpaceCameraController.enableTilt = false;
-	//scene.screenSpaceCameraController.enableLook = false;
 	viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 	
-	var originEntity = undefined;
-	var selectedVillage="";
-	var villages = [];
-	var villageIndex = [];
-	var command = "";
-	var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 	//初始化视角 坐标
 	//西安市区坐标
 	var initialPosition = new Cesium.Cartesian3.fromDegrees(108.962896,34.270019, 55000.000000);
-	//上庄灞柳小区坐标
-	//var initialPosition = new Cesium.Cartesian3.fromDegrees(109.0045201705284,34.38019345131998, 2000.000000);
 	var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(0.000000, -90.000000, 0.000000);
 	var villageOrientation = new Cesium.HeadingPitchRoll.fromDegrees(0.000000, -45.000000, 0.000000);
 	var homeCameraView = {
@@ -52,7 +53,8 @@
 		}
 	};	
 
-
+	//home键设置
+	var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 	viewer.scene.camera.setView(homeCameraView);
 	viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
 		e.cancel = true;
@@ -73,20 +75,6 @@
 		viewer.scene.camera.flyTo(homeCameraView);
 	});
 
-/* 	var layers = viewer.scene.imageryLayers;
-	var blackMarble = layers.addImageryProvider(new Cesium.createTileMapServiceImageryProvider({
-		url : 'http://cesiumjs.org/tilesets/imagery/blackmarble',
-		maximumLevel : 8,
-		credit : 'Black Marble imagery courtesy NASA Earth Observatory'
-	})); */
-
-
-	var kmlOptions = {
-		camera : viewer.scene.camera,
-		canvas : viewer.scene.canvas,
-		//clampToGround : true
-	};
-
 	//获取小区信息
 	command = "SELECT * FROM 小区总表";
 	var villageInfo = NonAsyncReadData(command);
@@ -97,23 +85,13 @@
 		villageIndex[villageInfo[i].项目编号] = villageInfo[i];
 	}
 	
-	
 	for (var i = 0; i < villages.length; i++)
 	{
 		readBoundaryLineKML('/Source/KMLFiles/' + villages[i] + '_bl.kml');
 		readBuildingKML('/Source/KMLFiles/' + villages[i] + '_bldg.kml');
 	}
-
-	var entryData = new Cesium.CustomDataSource();
-	var trafficData = new Cesium.CustomDataSource();
-	var buildingData = new Cesium.CustomDataSource();
-	var serviceData = new Cesium.CustomDataSource();
-
-
-	var command = "";
 	
-	
-	//读取信息
+	//读取表信息
 	function readListData(toReadList, toReadData)
 	{		
 		for(var list in toReadList)
@@ -139,9 +117,9 @@
 							horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
 							verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
 							//distanceDisplayCondition : new Cesium.DistanceDisplayCondition(10.0, 8000.0),
-					        pixelOffset:new Cesium.Cartesian2(0,-5)            //偏移
+					        pixelOffset:new Cesium.Cartesian2(0,-5)   
 						},
-						description: JsonToChart(obj)
+						description: JsonToChart(obj, ignoreList)
 					});
 					toReadData.entities.add(entity);
 				}
@@ -155,12 +133,11 @@
 	readListData(serviceList, serviceData);
 	readListData(trafficList, trafficData);
 	
+	var kmlOptions = {
+		camera : viewer.scene.camera,
+		canvas : viewer.scene.canvas,
+	};
 	
-
-	handler.setInputAction(onMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-	handler.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-	handler.setInputAction(onDoubleClick, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
-
 	//读取小区轮廓kml文件
 	function readBoundaryLineKML(url)
 	{
@@ -182,37 +159,37 @@
 	                var polyCenter = Cesium.BoundingSphere.fromPoints(polyPositions).center;
 	                polyCenter = Cesium.Ellipsoid.WGS84.scaleToGeodeticSurface(polyCenter);
 	                entity.position = polyCenter;
-	                // Generate labels
 	                entity.label = {
 	                    text : entity.name,
-						font:'normal 52px MicroSoft YaHei',    //字体样式
+						font:'normal 52px MicroSoft YaHei',
 	                    showBackground : true,
 	                    scale : 0.5,
-				        fillColor:Cesium.Color.BLACK,        //字体颜色
+				        fillColor:Cesium.Color.BLACK,
 						horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
 						verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
 						distanceDisplayCondition : new Cesium.DistanceDisplayCondition(8000.0, 80000.0),
-				        backgroundColor:Cesium.Color.WHITE,    //背景颜色
-				        showBackground:true,                //是否显示背景颜色
-				        style: Cesium.LabelStyle.FILL,        //label样式
-				        pixelOffset:new Cesium.Cartesian2(0,-16)            //偏移
+				        backgroundColor:Cesium.Color.WHITE, 
+				        showBackground:true,
+				        style: Cesium.LabelStyle.FILL,
+				        pixelOffset:new Cesium.Cartesian2(0,-16)
 	                };
+					//读取折线
 					/*var polyPositions = entity.polyline.positions.getValue(Cesium.JulianDate.now());
 					var polyCenter = Cesium.BoundingSphere.fromPoints(polyPositions).center;
 					polyCenter = Cesium.Ellipsoid.WGS84.scaleToGeodeticSurface(polyCenter);
 					entity.position = polyCenter;
 					entity.label = {
 						text : entity.name,
-						font:'normal 52px MicroSoft YaHei',    //字体样式
+						font:'normal 52px MicroSoft YaHei',
 						scale : 0.5,
-				        fillColor:Cesium.Color.BLACK,        //字体颜色
+				        fillColor:Cesium.Color.BLACK,
 						horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
 						verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
 						distanceDisplayCondition : new Cesium.DistanceDisplayCondition(8000.0, 80000.0),
-				        backgroundColor:Cesium.Color.WHITE,    //背景颜色
-				        showBackground:true,                //是否显示背景颜色
-				        style: Cesium.LabelStyle.FILL,        //label样式
-				        pixelOffset:new Cesium.Cartesian2(0,-16)            //偏移
+				        backgroundColor:Cesium.Color.WHITE,
+				        showBackground:true,
+				        style: Cesium.LabelStyle.FILL,
+				        pixelOffset:new Cesium.Cartesian2(0,-16)
 					};*/
 					viewer.scene.postProcessStages.fxaa.enabled = false;
 					entity.description = undefined;
@@ -220,48 +197,6 @@
 			}
 		})
 	}
-	
-	/* //读取小区周边kml文件	
-	function readNeighborKML(url)
-	{		
-		var neighborPromise = Cesium.KmlDataSource.load(url, kmlOptions);
-		neighborPromise.then(function(dataSource) {
-			viewer.dataSources.add(dataSource);
-			dataSourceIndex[dataSource.name+'_nbhd'] = viewer.dataSources.indexOf(dataSource);
-			dataSource.show = false;
-			var neighborEntities = dataSource.entities.values;
-			for(var i = 0; i < neighborEntities.length; i++)
-			{
-			  var entity = neighborEntities[i];
-			  if (Cesium.defined(entity.billboard)) {
-			  	entity.billboard = undefined;
-			  		entity.point= {
-				        pixelSize : 3,
-				        color : Cesium.Color.RED,
-				        outlineColor : Cesium.Color.WHITE,
-				        outlineWidth : 1
-				    };
-					entity.label = {
-						text : entity.name,
-						showBackground : true,
-						scale : 0.6,
-						horizontalOrigin : Cesium.HorizontalOrigin.CENTER,
-						verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
-						distanceDisplayCondition : new Cesium.DistanceDisplayCondition(10.0, 8000.0),
-				        pixelOffset:new Cesium.Cartesian2(0,-5)            //偏移
-					}
-					var cartographicPosition = Cesium.Cartographic.fromCartesian(entity.position.getValue(Cesium.JulianDate.now()));
-					var latitude = Cesium.Math.toDegrees(cartographicPosition.latitude);
-					var longitude = Cesium.Math.toDegrees(cartographicPosition.longitude);
-					var description = '<table class="cesium-infoBox-defaultTable cesium-infoBox-defaultTable-lighter"><tbody>' +
-						'<tr><th>' + "Longitude" + '</th><td>' + longitude.toFixed(5) + '</td></tr>' +
-						'<tr><th>' + "Latitude" + '</th><td>' + latitude.toFixed(5) + '</td></tr>' +
-						'</tbody></table>';
-					entity.description = description;
-				}
-			}
-		})
-	} */
 
 	//读取建筑kml文件
 	function readBuildingKML(url)
@@ -279,7 +214,7 @@
 			for (var i in buildingSql)
 			{
 				var obj = buildingSql[i];
-				sqlData[obj.单元号] = JsonToChart(obj);
+				sqlData[obj.单元号] = JsonToChart(obj, ignoreList);
 			}
 			
 			var buildingEntities = dataSource.entities.values;
@@ -301,14 +236,9 @@
 					}
 				}
 			}
-			//createChart(floorData);
-			
 		})
 	}
 		
-
-
-
 	//选择框
 	$('input[type="radio"][name="mode"]').change(function modechange(){
 		var mode = $(this).val();
@@ -324,7 +254,7 @@
 			var village = villageIndex[selectedVillage];
 			for(var i in village)
 			{
-				if((i!="项目图片")&&(i!="项目效果图")&&(i!="交通信息文字简介")&&(i!="经度")&&(i!="纬度"))
+				if (ignoreList.indexOf(i) == -1)
 				{
 					information += ("<tr><th>" + i + "</th><th>" + village[i] + "</th></tr>"); 
 				}
@@ -378,118 +308,30 @@
 		}
 	});
 
-	function isEntity(feature){
-		if (Cesium.defined(feature)) {
-			var entity = Cesium.defaultValue(feature.id, feature.primitive.id);
-			if (entity instanceof Cesium.Entity)
-				return true;
-		}
-		return false;
-	}
-
-	//读取sql信息	
-	function getInfo(sqlCommand){
-		return new Promise(function(resolve, reject){
-			$.getJSON("/get?command=" + sqlCommand, function(json){
-				resolve(json);
-			});	
-		})   	
-	};
+	//初始化绑定事件
+	handler.setInputAction(onMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+	handler.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+	handler.setInputAction(onDoubleClick, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 	
-	//同步读取
-	function NonAsyncReadData(command)
-	{
-		var xmlhttp;   
-		if (window.XMLHttpRequest)
-		{
-			//  IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
-			xmlhttp=new XMLHttpRequest();
-		}
-		else
-		{
-			// IE6, IE5 浏览器执行代码
-			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-		}
-
-		xmlhttp.open("GET", "/get?command=" + command, false);
-		xmlhttp.send();
-		return JSON.parse(xmlhttp.responseText);
-	}
-	
-	function JsonToChart(json){
-    	var tableHtml = "<table>";
-		for(var i in json){
-			if ((i == "项目编号")||(i == "经度")||(i == "纬度"))
-			{
-				continue;
-			}
-		    tableHtml += "<tr>";
-		    tableHtml += ("<td>" + i + "</td><td>" + json[i] + "<td>");
-		    tableHtml += "</tr>";
-    	}
-    	tableHtml += "</table>";
-    	return tableHtml;
-    };
-	
-	//悬停小区信息
-	/* function onMouseMove(movement) {
-	    var startFeature = viewer.scene.pick(movement.startPosition);
-	    var endFeature = viewer.scene.pick(movement.endPosition);
-	    var startFlag = isEntity(startFeature);
-	    var endFlag = isEntity(endFeature);
-	    if(startFlag && endFlag && (startFeature!=endFeature)){
-	    	startFeature.id.polygon.material = Cesium.Color.WHITE;
-	    	endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
-	    	var hover = document.getElementById("hoverPopLayer");
-	    	hover.style.left = movement.endPosition.x + "px";
-	    	hover.style.top = movement.endPosition.y + "px";
-	    	var command = "SELECT * FROM 小区总表 WHERE 项目编号 = '" + endFeature.id.kml.extendedData.village.value + "'";
-			popPicBox("hoverPopLayer");
-			getInfo(command).then(function(value){
-				JsonToChart(value[0], "hoverPopLayer");
-			});
-			document.getElementById("cesiumContainer").style.cursor = "pointer";
-	    }
-		if(startFlag && (!endFlag))
-		{
-			startFeature.id.polygon.material = Cesium.Color.WHITE;
-			closePicBox("hoverPopLayer");
-			document.getElementById("cesiumContainer").style.cursor = "default";
-		}
-		if((!startFlag) && endFlag)
-		{
-			endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
-	    	var hover = document.getElementById("hoverPopLayer");
-	    	hover.style.left = movement.endPosition.x + "px";
-	    	hover.style.top = movement.endPosition.y + "px";
-	    	var command = "SELECT * FROM 小区总表 WHERE 项目编号 = '" + endFeature.id.kml.extendedData.village.value + "'";
-			popPicBox("hoverPopLayer");
-			getInfo(command).then(function(value){
-				JsonToChart(value[0], "hoverPopLayer");
-			});
-			document.getElementById("cesiumContainer").style.cursor = "pointer";
-		}
-	} */
-
 	//悬停小区
 	function onMouseMove(movement) {
 	    var startFeature = viewer.scene.pick(movement.startPosition);
 	    var endFeature = viewer.scene.pick(movement.endPosition);
 	    var startFlag = isEntity(startFeature);
 	    var endFlag = isEntity(endFeature);
+		
 	    if(startFlag && endFlag && (startFeature!=endFeature)){
-	    	startFeature.id.polygon.material = Cesium.Color.WHITE;
-	    	endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
+	    	//endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
 			document.getElementById("cesiumContainer").style.cursor = "pointer";
 	    }
 		if(startFlag && (!endFlag))
 		{
-			startFeature.id.polygon.material = Cesium.Color.WHITE;
+			//startFeature.id.polygon.material = Cesium.Color.WHITE;
 			document.getElementById("cesiumContainer").style.cursor = "default";
 		}
 		if((!startFlag) && endFlag)
 		{
-			endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
+			//endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
 	    	var hover = document.getElementById("hoverPopLayer");
 			document.getElementById("cesiumContainer").style.cursor = "pointer";
 		}
@@ -543,7 +385,7 @@
 				var village = villageIndex[selectedVillage];
 				for(var i in village)
 				{
-					if((i != "项目图片")&&(i != "项目效果图")&&(i != "交通信息文字简介")&&(i != "经度")&&(i != "纬度"))
+					if(ignoreList.indexOf(i) == -1)
 					{
 						information += ("<tr><th>" + i + "</th><th>" + village[i] + "</th></tr>"); 
 					}
@@ -564,7 +406,7 @@
 				handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 				handler.setInputAction(onLeftClickBldg, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 				handler.setInputAction(onMouseMoveBldg, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-				selectedEntity.polygon.material = new Cesium.Color(1,1,1,0);
+				selectedEntity.polygon.material = new Cesium.Color(1, 1, 1, 0);
 				
 				var menuLayer = document.getElementById("menuLayer");
 				menuLayer.style.display = "block";
@@ -572,21 +414,12 @@
   		}
 	}
 
-	function isIncluded(feature, dataSource){
-		if (Cesium.defined(feature)) {
-			var entity = Cesium.defaultValue(feature.id, feature.primitive.id);
-			if (dataSource.entities.contains(entity))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-
+	//小区内悬停
 	function onMouseMoveBldg(movement) {
 	    var startFeature = viewer.scene.pick(movement.startPosition);
 	    var endFeature = viewer.scene.pick(movement.endPosition);
+		var entryStartFlag = isIncluded(startFeature, entryData);
+	    var entryEndFlag = isIncluded(endFeature, entryData);
 	    var buildingStartFlag = isIncluded(startFeature, buildingData);
 	    var buildingEndFlag = isIncluded(endFeature, buildingData);
 		var serviceStartFlag = isIncluded(startFeature, serviceData);
@@ -594,8 +427,23 @@
 		var trafficStartFlag = isIncluded(startFeature, trafficData);
 	    var trafficEndFlag = isIncluded(endFeature, trafficData);
 		
+		//出入口悬停
+	    if(entryStartFlag && entryEndFlag && (startFeature != endFeature))
+		{
+			document.getElementById("cesiumContainer").style.cursor = "pointer";
+	    }
+		if(entryStartFlag && (!entryEndFlag))
+		{
+			document.getElementById("cesiumContainer").style.cursor = "default";
+		}
+		if((!entryStartFlag) && entryEndFlag)
+		{
+			document.getElementById("cesiumContainer").style.cursor = "pointer";
+	    }
+		
 		//建筑悬停
-	    if(buildingStartFlag && buildingEndFlag && (startFeature != endFeature)){
+	    if(buildingStartFlag && buildingEndFlag && (startFeature != endFeature))
+		{
 	    	startFeature.id.polygon.material = Cesium.Color.TAN;
 	    	endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
 	    	var hover = document.getElementById("hoverPopLayer");
@@ -626,7 +474,8 @@
 	    }
 		
 		//公服设施悬停
-	    if(serviceStartFlag && serviceEndFlag && (startFeature != endFeature)){
+	    if(serviceStartFlag && serviceEndFlag && (startFeature != endFeature))
+		{
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
@@ -653,7 +502,8 @@
 	    }
 		
 		//交通悬停
-	    if(trafficStartFlag && trafficEndFlag && (startFeature != endFeature)){
+	    if(trafficStartFlag && trafficEndFlag && (startFeature != endFeature))
+		{
 	    	var hover = document.getElementById("hoverPopLayer");
 	    	hover.style.left = movement.endPosition.x + "px";
 	    	hover.style.top = movement.endPosition.y + "px";
@@ -681,23 +531,14 @@
 		
 	}
 
-	//小区内左键单击选择建筑
+	//左键单击事件（出入口）
 	function onLeftClickBldg(movement) {
     	var pickedFeature = viewer.scene.pick(movement.position);
     	if (Cesium.defined(pickedFeature)) {
 		    var selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
-			if (selectedEntity instanceof Cesium.Entity) {
-				document.getElementById("picPopLayer").innerHTML=
-				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('picPopLayer')\">x</a><br/>"
-				+ "<img src = '/Source/pic/baliu_001.jpg'/>";
-				popPicBox("picPopLayer");
-				document.getElementById("infoPopLayer").innerHTML=
-				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
-				+ "<table>" 
-				+ "<tr><th>" + "表头1" + "</th><th>" + "表头2" + "</th></tr>" 
-				+ "<tr><td>" + "表项1" + "</td><td>" + "表项2" + "</td></tr>" 
-				+ "</table>";
-				popPicBox("infoPopLayer");
+			if (entryData.entities.contains(selectedEntity)) 
+			{
+				//TODO：弹出表格
 		    }
   		}
 	}
