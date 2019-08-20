@@ -64,10 +64,10 @@
 		handler.setInputAction(onLeftClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 		handler.setInputAction(onDoubleClick, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
-		closePicBox("infoPopLayer");
-		closePicBox("picPopLayer");
-		closePicBox("descPopLayer");
-		closePicBox("menuLayer");
+		closeBox("infoPopLayer");
+		closeBox("picPopLayer");
+		closeBox("descPopLayer");
+		closeBox("menuLayer");
 		serviceData.show = false;
 		trafficData.show = false;
 		buildingData.show = false;
@@ -132,8 +132,33 @@
 	//读取规划信息
 	function readPlanList()
 	{
-		
-		
+		command = "SELECT * FROM 规划指标";
+		getInfo(command).then(function(value){
+			for(var i in value)
+			{
+				var obj = value[i];
+				var chartData = [];
+				
+				if(selectedVillage != obj.项目编号)
+				{
+					continue;
+				}
+				for(var j in obj)
+				{
+					if (planChartList.indexOf(j) > -1)
+					{
+						chartData[j] = obj[j];
+					}
+				}
+				var information = "";
+				information = JsonToChart(value[i], planChartList);
+				popBox("infoPopLayer");
+				document.getElementById("infoPopLayer").innerHTML = 
+					"<a href=\"javascript:void(0)\" Onclick=\"closeBox('infoPopLayer')\">x</a><br/>"
+					+ information;
+				}
+				createChart(chartData);
+		});
 	}
 	
 	readListData(entryList, entryData);
@@ -251,7 +276,7 @@
 		var mode = $(this).val();
 		if(mode == "overview")
 		{
-			closePicBox("hoverPopLayer");
+			closeBox("hoverPopLayer");
 			entryData.show = true;
 			trafficData.show = false;
 			serviceData.show = false;
@@ -267,51 +292,56 @@
 				}
 			}
 			information += "</table>";
-			popPicBox("infoPopLayer");
+			popBox("infoPopLayer");
 			document.getElementById("infoPopLayer").innerHTML = 
-				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
+				"<a href=\"javascript:void(0)\" Onclick=\"closeBox('infoPopLayer')\">x</a><br/>"
 				+ information;
 
-			popPicBox("picPopLayer");
+			popBox("picPopLayer");
 			document.getElementById("picPopLayer").innerHTML=
-			"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('picPopLayer')\">x</a><br/>"
+			"<a href=\"javascript:void(0)\" Onclick=\"closeBox('picPopLayer')\">x</a><br/>"
 			+ "<img src = '/Source/pic/" + selectedVillage + "/" + villageIndex[selectedVillage].项目图片 + "'/>";
 		}
 		else if(mode == "building")
 		{
-			closePicBox("hoverPopLayer");
-			closePicBox("infoPopLayer");
-			closePicBox("picPopLayer");
+			closeBox("hoverPopLayer");
+			closeBox("infoPopLayer");
+			closeBox("picPopLayer");
+			closeBox("chartPopLayer");
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = false;
 		}
 		else if(mode == "traffic")
 		{
-			closePicBox("hoverPopLayer");
-			closePicBox("infoPopLayer");
-			closePicBox("picPopLayer");
+			closeBox("hoverPopLayer");
+			closeBox("infoPopLayer");
+			closeBox("picPopLayer");
+			closeBox("chartPopLayer");
 			entryData.show = false;
 			trafficData.show = true;
 			serviceData.show = false;
 		}
 		else if(mode == "service")
 		{
-			closePicBox("hoverPopLayer");
-			closePicBox("infoPopLayer");
-			closePicBox("picPopLayer");
+			closeBox("hoverPopLayer");
+			closeBox("infoPopLayer");
+			closeBox("picPopLayer");
+			closeBox("chartPopLayer");
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = true;
 		}
 		else if(mode == "plan")
 		{
-			closePicBox("hoverPopLayer");
-			closePicBox("infoPopLayer");
-			closePicBox("picPopLayer");
+			closeBox("hoverPopLayer");
+			closeBox("infoPopLayer");
+			closeBox("picPopLayer");
+			popBox("chartPopLayer");
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = false;
+			readPlanList();
 		}
 	});
 
@@ -352,13 +382,13 @@
 			if (selectedEntity instanceof Cesium.Entity) {
 				document.getElementById("cesiumContainer").style.cursor = "default";
 				selectedVillage = selectedEntity.kml.extendedData.village.value;
-				popPicBox("descPopLayer");
+				popBox("descPopLayer");
 				document.getElementById("descPopLayer").innerHTML=
-					"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('descPopLayer')\">x</a><br/><p>"
+					"<a href=\"javascript:void(0)\" Onclick=\"closeBox('descPopLayer')\">x</a><br/><p>"
 					+ villageIndex[selectedVillage].交通信息文字简介 + "</p>";
-				popPicBox("picPopLayer");
+				popBox("picPopLayer");
 				document.getElementById("picPopLayer").innerHTML=
-				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('picPopLayer')\">x</a><br/>"
+				"<a href=\"javascript:void(0)\" Onclick=\"closeBox('picPopLayer')\">x</a><br/>"
 				+ "<img src = '/Source/pic/" + selectedVillage + "/" + villageIndex[selectedVillage].项目效果图 + "'/>";
 			}
 		}
@@ -371,7 +401,7 @@
 		    var selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
 			if (selectedEntity instanceof Cesium.Entity) {
 				document.getElementById("cesiumContainer").style.cursor = "default";
-				closePicBox("descPopLayer");
+				closeBox("descPopLayer");
 	            var polyCenter = selectedEntity.position.getValue();
 	            var cartographic=Cesium.Cartographic.fromCartesian(polyCenter);
 				var lat = Cesium.Math.toDegrees(cartographic.latitude);
@@ -398,14 +428,14 @@
 					}
 				}
 				information += "</table>";
-				popPicBox("infoPopLayer");
+				popBox("infoPopLayer");
 				document.getElementById("infoPopLayer").innerHTML = 
-					"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('infoPopLayer')\">x</a><br/>"
+					"<a href=\"javascript:void(0)\" Onclick=\"closeBox('infoPopLayer')\">x</a><br/>"
 					+ information;
 
-				popPicBox("picPopLayer");
+				popBox("picPopLayer");
 				document.getElementById("picPopLayer").innerHTML=
-				"<a href=\"javascript:void(0)\" Onclick=\"closePicBox('picPopLayer')\">x</a><br/>"
+				"<a href=\"javascript:void(0)\" Onclick=\"closeBox('picPopLayer')\">x</a><br/>"
 				+ "<img src = '/Source/pic/" + selectedVillage + "/" + villageIndex[selectedVillage].项目图片 + "'/>";
 
 				handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
@@ -459,13 +489,13 @@
 			if (Cesium.defined(endFeature.id.description))
 			{
 				hover.innerHTML = endFeature.id.description;
-				popPicBox("hoverPopLayer");
+				popBox("hoverPopLayer");
 			}
 	    }
 		if(buildingStartFlag && (!buildingEndFlag))
 		{
 			startFeature.id.polygon.material = Cesium.Color.TAN;
-			closePicBox("hoverPopLayer");
+			closeBox("hoverPopLayer");
 		}
 		if((!buildingStartFlag) && buildingEndFlag)
 		{
@@ -476,7 +506,7 @@
 			if (Cesium.defined(endFeature.id.description))
 			{
 				hover.innerHTML = endFeature.id.description;
-				popPicBox("hoverPopLayer");
+				popBox("hoverPopLayer");
 			}
 	    }
 		
@@ -489,12 +519,12 @@
 			if (Cesium.defined(endFeature.id.description))
 			{
 				hover.innerHTML = endFeature.id.description;
-				popPicBox("hoverPopLayer");
+				popBox("hoverPopLayer");
 			}
 	    }
 		if(serviceStartFlag && (!serviceEndFlag))
 		{
-			closePicBox("hoverPopLayer");
+			closeBox("hoverPopLayer");
 		}
 		if((!serviceStartFlag) && serviceEndFlag)
 		{
@@ -504,7 +534,7 @@
 			if (Cesium.defined(endFeature.id.description))
 			{
 				hover.innerHTML = endFeature.id.description;
-				popPicBox("hoverPopLayer");
+				popBox("hoverPopLayer");
 			}
 	    }
 		
@@ -517,12 +547,12 @@
 			if (Cesium.defined(endFeature.id.description))
 			{
 				hover.innerHTML = endFeature.id.description;
-				popPicBox("hoverPopLayer");
+				popBox("hoverPopLayer");
 			}
 	    }
 		if(trafficStartFlag && (!trafficEndFlag))
 		{
-			closePicBox("hoverPopLayer");
+			closeBox("hoverPopLayer");
 		}
 		if((!trafficStartFlag) && trafficEndFlag)
 		{
@@ -532,7 +562,7 @@
 			if (Cesium.defined(endFeature.id.description))
 			{
 				hover.innerHTML = endFeature.id.description;
-				popPicBox("hoverPopLayer");
+				popBox("hoverPopLayer");
 			}
 	    }
 		

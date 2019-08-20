@@ -1,6 +1,6 @@
 function createChart(/*x_data, y_data, x_name, y_name*/chartData)
 {
-	var dom = document.getElementById("echartsContainer");
+	var dom = document.getElementById("chartPopLayer");
 	var myChart = echarts.init(dom);
 	var app = {};
 	option = null;
@@ -15,7 +15,6 @@ function createChart(/*x_data, y_data, x_name, y_name*/chartData)
 		}
 		data.push(object);
 	}
-	
 	
 /* 	option = {
 		xAxis: {
@@ -42,15 +41,6 @@ function createChart(/*x_data, y_data, x_name, y_name*/chartData)
 	option = {
 		backgroundColor: '#2c343c',
 
-		title: {
-			text: '层高分布',
-			left: 'center',
-			top: 20,
-			textStyle: {
-				color: '#ccc'
-			}
-		},
-
 		tooltip : {
 			trigger: 'item',
 			formatter: "{a} <br/>{b} : {c} ({d}%)"
@@ -58,7 +48,6 @@ function createChart(/*x_data, y_data, x_name, y_name*/chartData)
 
 		series : [
 			{
-				name:'层高',
 				type:'pie',
 				radius : '55%',
 				center: ['50%', '50%'],
@@ -106,9 +95,6 @@ function createChart(/*x_data, y_data, x_name, y_name*/chartData)
 	};
 	
 	if (option && typeof option === "object") {
-	myChart.setOption(option, true);
+		myChart.setOption(option, true);
 	}
-	
-	popChart();
-	dom.display = "block";
 }
