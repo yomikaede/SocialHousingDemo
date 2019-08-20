@@ -104,6 +104,7 @@
 					
 					var entity = new Cesium.Entity({
 						position: Cesium.Cartesian3.fromDegrees(obj.经度 - 0.005, obj.纬度 + 0.0014),	
+						
 						point: {
 							pixelSize : 3,
 							color : Cesium.Color.RED,
@@ -277,9 +278,11 @@
 		if(mode == "overview")
 		{
 			closeBox("hoverPopLayer");
+			closeBox("chartPopLayer");
 			entryData.show = true;
 			trafficData.show = false;
 			serviceData.show = false;
+			setBuildingAlpha(1);
 
 			//根据selectvillage得到概览内容，填入infoPopLayer中的表格内
 			var information = "<table>";
@@ -311,6 +314,7 @@
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = false;
+			setBuildingAlpha(1);
 		}
 		else if(mode == "traffic")
 		{
@@ -321,6 +325,7 @@
 			entryData.show = false;
 			trafficData.show = true;
 			serviceData.show = false;
+			setBuildingAlpha(0.3);
 		}
 		else if(mode == "service")
 		{
@@ -331,6 +336,7 @@
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = true;
+			setBuildingAlpha(0.3);
 		}
 		else if(mode == "plan")
 		{
@@ -341,6 +347,7 @@
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = false;
+			setBuildingAlpha(0.3);
 			readPlanList();
 		}
 	});
@@ -451,6 +458,20 @@
   		}
 	}
 
+	//设置建筑透明度
+	function setBuildingAlpha(alphaValue)
+	{
+		var buildingEntities = buildingData.entities.values;
+		console.log(buildingEntities);
+		for(var i in buildingEntities)
+		{
+			if(Cesium.defined(buildingEntities[i].polygon))
+			{
+				buildingEntities[i].polygon.material = Cesium.Color.TAN.withAlpha(alphaValue);
+			}
+		}
+	}
+	
 	//小区内悬停
 	function onMouseMoveBldg(movement) {
 	    var startFeature = viewer.scene.pick(movement.startPosition);
@@ -571,13 +592,12 @@
 	//左键单击事件（出入口）
 	function onLeftClickBldg(movement) {
     	var pickedFeature = viewer.scene.pick(movement.position);
-    	if (Cesium.defined(pickedFeature)) {
-		    var selectedEntity = Cesium.defaultValue(pickedFeature.id, pickedFeature.primitive.id);
-			if (entryData.entities.contains(selectedEntity)) 
-			{
-				//TODO：弹出表格
-		    }
-  		}
+		if (isIncluded(pickedFeature, entryData)) 
+		{
+			//TODO:数据库缺少出入口数据
+			popBox("chartPopLayer");
+			createChart([1,2,3,4]);
+		}
 	}
 	
 }());
