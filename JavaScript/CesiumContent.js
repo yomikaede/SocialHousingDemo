@@ -69,6 +69,7 @@
 		closeBox("picPopLayer");
 		closeBox("descPopLayer");
 		closeBox("menuLayer");
+		closeBox("chartPopLayer");
 		serviceData.show = false;
 		trafficData.show = false;
 		buildingData.show = false;
