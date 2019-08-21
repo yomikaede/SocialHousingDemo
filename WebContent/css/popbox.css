@@ -93,6 +93,16 @@ input {
 	right: 10px;
 }
 
+#apartment {
+	bottom: 20px;
+	left: 10px;
+}
+
+#apartment img{
+	width: 100px;
+	height:  100px;
+}
+
 #chartPopLayer {
 	position: absolute;
 	bottom: 20px;

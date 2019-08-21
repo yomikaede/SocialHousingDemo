@@ -11,11 +11,12 @@
 	var planChartList = ["住宅建筑面积","商业建筑面积","幼儿园建筑面积","活动中心建筑面积","物业服务建筑面积",
 						"卫生站建筑面积","垃圾回收站","公厕","市场建筑面积"];
 	var ignoreList = ["项目编号","经度","纬度","项目图片","项目效果图","交通信息文字简介","道路断面形式"];
-	
+
 	var originEntity = undefined;
 	var selectedVillage = "";
 	var villages = [];
 	var villageIndex = [];
+	var apartment = [];
 	var command = "";
 	var entryData = new Cesium.CustomDataSource();
 	var trafficData = new Cesium.CustomDataSource();
@@ -279,6 +280,7 @@
 		{
 			closeBox("hoverPopLayer");
 			closeBox("chartPopLayer");
+			closeBox("apartment");
 			entryData.show = true;
 			trafficData.show = false;
 			serviceData.show = false;
@@ -311,10 +313,40 @@
 			closeBox("infoPopLayer");
 			closeBox("picPopLayer");
 			closeBox("chartPopLayer");
+			popBox("apartment");
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = false;
 			setBuildingAlpha(1);
+			var aptList = "";
+			command = "SELECT * FROM 户型 WHERE 项目编号 = '" + selectedVillage + "'";
+			getInfo(command).then(function(value){
+				var picBoxInnerArr = [];
+				apartment = value;
+				for (var i = 0; i < value.length; i++)
+				{
+					aptList += ("<img id='apt_" + i + "' src = '/Source/pic/" + selectedVillage + "/" + value[i].户型图 + "'/>");		
+				}
+				document.getElementById("apartment").innerHTML = aptList;	
+ 				for (var i = 0; i< value.length; i++)
+				{
+					var picBoxInner;
+					picBoxInner	= "<a href=\"javascript:void(0)\" Onclick=\"closeBox('picPopLayer')\">x</a><br/>";	
+					picBoxInner += "<table>";
+					picBoxInner += ("<tr><th colspan=2>" + value[i].名称 + "</th></tr>");
+					picBoxInner += ("<tr><td>建筑面积</td><td>" + value[i].建筑面积 + "</td></tr>");
+					picBoxInner += ("<tr><td>类型</td><td>" + value[i].类型 + "</td></tr>");
+					picBoxInner += ("<tr><td colspan=2>" + value[i].文字介绍 + "</td></tr>");
+					picBoxInner += "</table><br/>";
+					picBoxInner += ("<img src = '/Source/pic/" + selectedVillage + "/" + value[i].户型图 + "'/>");
+					picBoxInnerArr["apt_" + i] = picBoxInner;
+					document.getElementById("apt_" + i).onclick = function(){
+						popBox("picPopLayer");
+						picPopLayer.innerHTML = picBoxInnerArr[this.id];	
+					};	 
+				}
+			});
+			popBox("apartment");
 		}
 		else if(mode == "traffic")
 		{
@@ -322,6 +354,7 @@
 			closeBox("infoPopLayer");
 			closeBox("picPopLayer");
 			closeBox("chartPopLayer");
+			closeBox("apartment");
 			entryData.show = false;
 			trafficData.show = true;
 			serviceData.show = false;
@@ -333,6 +366,7 @@
 			closeBox("infoPopLayer");
 			closeBox("picPopLayer");
 			closeBox("chartPopLayer");
+			closeBox("apartment");
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = true;
@@ -344,11 +378,12 @@
 			closeBox("infoPopLayer");
 			closeBox("picPopLayer");
 			popBox("chartPopLayer");
+			closeBox("apartment");
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = false;
-			setBuildingAlpha(0.3);
 			readPlanList();
+			setBuildingAlpha(1);
 		}
 	});
 
@@ -462,7 +497,6 @@
 	function setBuildingAlpha(alphaValue)
 	{
 		var buildingEntities = buildingData.entities.values;
-		console.log(buildingEntities);
 		for(var i in buildingEntities)
 		{
 			if(Cesium.defined(buildingEntities[i].polygon))
@@ -489,6 +523,7 @@
 	    if(entryStartFlag && entryEndFlag && (startFeature != endFeature))
 		{
 			document.getElementById("cesiumContainer").style.cursor = "pointer";
+			setBuildingAlpha(0.5);
 	    }
 		if(entryStartFlag && (!entryEndFlag))
 		{
