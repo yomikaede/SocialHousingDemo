@@ -12,6 +12,7 @@
 						"卫生站建筑面积","垃圾回收站","公厕","市场建筑面积"];
 	var ignoreList = ["项目编号","经度","纬度","项目图片","项目效果图","交通信息文字简介","道路断面形式"];
 
+	var buildingFlag = false;
 	var originEntity = undefined;
 	var selectedVillage = "";
 	var villages = [];
@@ -285,6 +286,7 @@
 			entryData.show = true;
 			trafficData.show = false;
 			serviceData.show = false;
+			buildingFlag = false;
 			setBuildingAlpha(1);
 
 			//根据selectvillage得到概览内容，填入infoPopLayer中的表格内
@@ -318,6 +320,7 @@
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = false;
+			buildingFlag = true;
 			setBuildingAlpha(1);
 			var aptList = "";
 			command = "SELECT * FROM 户型 WHERE 项目编号 = '" + selectedVillage + "'";
@@ -359,6 +362,7 @@
 			entryData.show = false;
 			trafficData.show = true;
 			serviceData.show = false;
+			buildingFlag = false;
 			setBuildingAlpha(0.3);
 		}
 		else if(mode == "service")
@@ -371,6 +375,7 @@
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = true;
+			buildingFlag = false;
 			setBuildingAlpha(0.3);
 		}
 		else if(mode == "plan")
@@ -383,6 +388,7 @@
 			entryData.show = false;
 			trafficData.show = false;
 			serviceData.show = false;
+			buildingFlag = false;
 			readPlanList();
 			setBuildingAlpha(1);
 		}
@@ -524,7 +530,6 @@
 	    if(entryStartFlag && entryEndFlag && (startFeature != endFeature))
 		{
 			document.getElementById("cesiumContainer").style.cursor = "pointer";
-			setBuildingAlpha(0.5);
 	    }
 		if(entryStartFlag && (!entryEndFlag))
 		{
@@ -536,36 +541,39 @@
 	    }
 		
 		//建筑悬停
-	    if(buildingStartFlag && buildingEndFlag && (startFeature != endFeature))
+		if (buildingFlag == true)
 		{
-	    	startFeature.id.polygon.material = Cesium.Color.TAN;
-	    	endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
-	    	var hover = document.getElementById("hoverPopLayer");
-	    	hover.style.left = movement.endPosition.x + "px";
-	    	hover.style.top = movement.endPosition.y + "px";
-			if (Cesium.defined(endFeature.id.description))
+			if(buildingStartFlag && buildingEndFlag && (startFeature != endFeature))
 			{
-				hover.innerHTML = endFeature.id.description;
-				popBox("hoverPopLayer");
+				startFeature.id.polygon.material = Cesium.Color.TAN;
+				endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
+				var hover = document.getElementById("hoverPopLayer");
+				hover.style.left = movement.endPosition.x + "px";
+				hover.style.top = movement.endPosition.y + "px";
+				if (Cesium.defined(endFeature.id.description))
+				{
+					hover.innerHTML = endFeature.id.description;
+					popBox("hoverPopLayer");
+				}
 			}
-	    }
-		if(buildingStartFlag && (!buildingEndFlag))
-		{
-			startFeature.id.polygon.material = Cesium.Color.TAN;
-			closeBox("hoverPopLayer");
+			if(buildingStartFlag && (!buildingEndFlag))
+			{
+				startFeature.id.polygon.material = Cesium.Color.TAN;
+				closeBox("hoverPopLayer");
+			}
+			if((!buildingStartFlag) && buildingEndFlag)
+			{
+				endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
+				var hover = document.getElementById("hoverPopLayer");
+				hover.style.left = movement.endPosition.x + "px";
+				hover.style.top = movement.endPosition.y + "px";
+				if (Cesium.defined(endFeature.id.description))
+				{
+					hover.innerHTML = endFeature.id.description;
+					popBox("hoverPopLayer");
+				}
+			}
 		}
-		if((!buildingStartFlag) && buildingEndFlag)
-		{
-			endFeature.id.polygon.material = new Cesium.Color(0.8, 0.8, 1, 1);
-	    	var hover = document.getElementById("hoverPopLayer");
-	    	hover.style.left = movement.endPosition.x + "px";
-	    	hover.style.top = movement.endPosition.y + "px";
-			if (Cesium.defined(endFeature.id.description))
-			{
-				hover.innerHTML = endFeature.id.description;
-				popBox("hoverPopLayer");
-			}
-	    }
 		
 		//公服设施悬停
 	    if(serviceStartFlag && serviceEndFlag && (startFeature != endFeature))
