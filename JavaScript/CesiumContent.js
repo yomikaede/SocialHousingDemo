@@ -90,8 +90,8 @@
 	
 	for (var i = 0; i < villages.length; i++)
 	{
-		readBoundaryLineKML(villages[i]);
-		readBuildingKML(villages[i]);
+		readBoundaryLineKML('/Source/KMLFiles/' + villages[i] + '_bl.kml');
+		readBuildingKML('/Source/KMLFiles/' + villages[i] + '_bldg.kml');
 	}
 	
 	//读取表信息
@@ -175,9 +175,8 @@
 	};
 	
 	//读取小区轮廓kml文件
-	function readBoundaryLineKML(villageId)
+	function readBoundaryLineKML(url)
 	{
-		var url = '/Source/KMLFiles/' + villageId + '_bl.kml';
 		var boundaryPromise = Cesium.KmlDataSource.load(url, kmlOptions);
 		boundaryPromise.then(function(dataSource) {
 			viewer.dataSources.add(dataSource);
@@ -236,17 +235,16 @@
 	}
 
 	//读取建筑kml文件
-	function readBuildingKML(villageId)
+	function readBuildingKML(url)
 	{
-		var url = '/Source/KMLFiles/' + villageId + '_bldg.kml';
 		var buildingPromise = Cesium.KmlDataSource.load(url, kmlOptions);
 		var floorData = [];
 		buildingPromise.then(function(dataSource) {
-			//viewer.dataSources.add(dataSource);
-			//buildingData = dataSource;
-			//dataSource.show = false;
-					
-			command = "SELECT * FROM 小区单元 WHERE 项目编号 = '" + villageId + "'";
+			viewer.dataSources.add(dataSource);
+			buildingData = dataSource;
+			dataSource.show = false;
+			
+			command = "SELECT * FROM 小区单元";						
 			var buildingSql = NonAsyncReadData(command);
 			var sqlData = [];
 			for (var i in buildingSql)
@@ -254,6 +252,7 @@
 				var obj = buildingSql[i];
 				sqlData[obj.单元号] = JsonToChart(obj, ignoreList);
 			}
+			
 			var buildingEntities = dataSource.entities.values;
 			for(var i = 0; i < buildingEntities.length; i++)
 			{
@@ -267,14 +266,12 @@
 						entity.polygon.material = Cesium.Color.TAN;
 						entity.polygon.outline = false;
 						entity.description = '';
-						entity.name = buildingInfo.buildingName.value;		
+						entity.name = buildingInfo.buildingName.value;			
 						entity.description = sqlData[entity.name];
 						//TODO:根据高度设置颜色
 					}
 				}
-				buildingData.entities.add(entity);
 			}
-			viewer.dataSources.add(buildingData);
 		})
 	}
 		
@@ -324,7 +321,6 @@
 			trafficData.show = false;
 			serviceData.show = false;
 			buildingFlag = true;
-			console.log(buildingData.entities);
 			setBuildingAlpha(1);
 			var aptList = "";
 			command = "SELECT * FROM 户型 WHERE 项目编号 = '" + selectedVillage + "'";
